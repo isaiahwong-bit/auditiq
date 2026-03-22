@@ -1,0 +1,28 @@
+{
+  "name": "auditiq",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build -w apps/web",
+    "build:api": "npm run build -w apps/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:migrate": "supabase db push",
+    "db:seed": "supabase db seed",
+    "db:reset": "supabase db reset",
+    "email:dev": "email dev --dir emails"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
