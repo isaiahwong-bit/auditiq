@@ -13,7 +13,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { session, profile, loading, signIn } = useAuth();
+  const { session, profile, orgSlug, loading, signIn } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
 
   const {
@@ -25,8 +25,8 @@ export default function Login() {
   });
 
   // Redirect if already logged in
-  if (!loading && session && profile) {
-    return <Navigate to={`/${profile.organisation_id}/dashboard`} replace />;
+  if (!loading && session && profile && orgSlug) {
+    return <Navigate to={`/${orgSlug}/dashboard`} replace />;
   }
 
   const onSubmit = async (data: LoginForm) => {

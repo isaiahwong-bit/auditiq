@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(DEMO_MODE ? DEMO_SESSION : null);
   const [user, setUser] = useState<User | null>(DEMO_MODE ? DEMO_USER : null);
   const [profile, setProfile] = useState<UserProfile | null>(DEMO_MODE ? DEMO_PROFILE : null);
+  const [orgSlug, setOrgSlug] = useState<string | null>(DEMO_MODE ? 'demo' : null);
   const [loading, setLoading] = useState(!DEMO_MODE);
 
   const fetchProfile = useCallback(async (userId: string) => {
@@ -30,6 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', userId)
       .single();
     setProfile(data);
+
+    if (data?.organisation_id) {
+      const { data: org } = await supabase
+        .from('organisations')
+        .select('slug')
+        .eq('id', data.organisation_id)
+        .single();
+      setOrgSlug(org?.slug ?? null);
+    }
   }, []);
 
   useEffect(() => {
@@ -79,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, orgSlug, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
