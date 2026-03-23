@@ -25,19 +25,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(!DEMO_MODE);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
+
+    if (error) {
+      console.error('Failed to fetch profile:', error.message);
+      return;
+    }
+
     setProfile(data);
 
     if (data?.organisation_id) {
-      const { data: org } = await supabase
+      const { data: org, error: orgError } = await supabase
         .from('organisations')
         .select('slug')
         .eq('id', data.organisation_id)
         .single();
+
+      if (orgError) {
+        console.error('Failed to fetch org:', orgError.message);
+        return;
+      }
+
       setOrgSlug(org?.slug ?? null);
     }
   }, []);

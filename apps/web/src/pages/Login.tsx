@@ -29,14 +29,31 @@ export default function Login() {
     return <Navigate to={`/${orgSlug}/dashboard`} replace />;
   }
 
+  const [signingIn, setSigningIn] = useState(false);
+
   const onSubmit = async (data: LoginForm) => {
     setAuthError(null);
+    setSigningIn(true);
     try {
       await signIn(data.email, data.password);
+      // Profile fetch happens via onAuthStateChange — wait briefly for it
     } catch (err) {
+      setSigningIn(false);
       setAuthError(err instanceof Error ? err.message : 'Sign in failed');
     }
   };
+
+  // Show loading after successful sign-in while profile loads
+  if (signingIn && session && !orgSlug) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-brand-gray-light">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-brand-green border-t-transparent" />
+          <p className="mt-3 text-sm text-brand-gray">Loading your workspace...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-brand-gray-light">
