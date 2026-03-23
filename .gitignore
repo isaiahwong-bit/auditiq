@@ -33,3 +33,9 @@ coverage/
 
 # Vite
 apps/web/.vite/
+
+# Screenshots
+Screenshot*.png
+
+# Supabase temp
+supabase/.temp/
