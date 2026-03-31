@@ -19,7 +19,6 @@ RUN npm run build -w apps/api
 FROM node:20-slim
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=base /app/apps/api/dist ./apps/api/dist
 COPY --from=base /app/apps/api/package.json ./apps/api/
 COPY --from=base /app/packages/types/ ./packages/types/
