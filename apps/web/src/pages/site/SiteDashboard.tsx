@@ -1,56 +1,207 @@
 import { Link, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useSite } from '../../hooks/use-site';
 import { useOrg } from '../../hooks/use-org';
 import { useAuth } from '../../hooks/use-auth';
+import { supabase } from '../../lib/supabase';
 
-// ── Demo / fallback data ────────────────────────────────────────────────────
+interface PreopArea {
+  id: string;
+  area: string;
+  passRate: number | null;
+}
 
-const DEMO_FRAMEWORKS = ['HACCP', 'BRCGS', 'Coles'];
+interface DashAlert {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'high' | 'medium' | 'low';
+}
 
-const DEMO_PREOP_AREAS = [
-  { id: '1', area: 'Kill Floor',        operator: 'J. Santos',    passRate: 96.4 },
-  { id: '2', area: 'Boning Room',       operator: 'M. Nguyen',    passRate: 88.2 },
-  { id: '3', area: 'Chiller 1',         operator: 'R. Okafor',    passRate: 72.0 },
-  { id: '4', area: 'Dispatch',          operator: 'K. Williams',  passRate: null  },
-  { id: '5', area: 'Offal Processing',  operator: 'T. Baker',     passRate: 100  },
-];
+interface DashCapa {
+  id: string;
+  title: string;
+  urgency: 'immediate' | '24hr' | '7day' | 'standard';
+  dueLabel: string;
+  overdue: boolean;
+}
 
-const DEMO_ALERTS = [
-  {
-    id: 'a1',
-    title: 'Declining hand-wash compliance in Boning Room',
-    description: 'Pass rate dropped from 94% to 72% over the last 5 sessions. Investigate root cause before next audit.',
-    severity: 'high' as const,
-    type: 'declining_trend',
-  },
-  {
-    id: 'a2',
-    title: 'Chiller 1 temp sensor drift detected',
-    description: 'Temperature readings trending 0.8 C above baseline over 14 days. Schedule recalibration.',
-    severity: 'medium' as const,
-    type: 'pattern_detected',
-  },
-  {
-    id: 'a3',
-    title: 'Seasonal pest-pressure increase expected',
-    description: 'Historical data indicates a 40% rise in pest-related NCARs during April in this region.',
-    severity: 'low' as const,
-    type: 'seasonal_risk',
-  },
-];
+interface DashCompliance {
+  id: string;
+  framework: string;
+  covered: number;
+  total: number;
+  status: 'green' | 'amber' | 'red';
+}
 
-const DEMO_CAPAS = [
-  { id: 'c1', title: 'Replace worn door seals — Chiller 1',           urgency: 'immediate' as const, dueLabel: 'Overdue',  overdue: true  },
-  { id: 'c2', title: 'Retrain boning room staff on hand-wash SOP',    urgency: '24hr' as const,      dueLabel: 'Today',    overdue: false },
-  { id: 'c3', title: 'Install secondary drain cover — Kill Floor',    urgency: '7day' as const,      dueLabel: '3 days',   overdue: false },
-  { id: 'c4', title: 'Update allergen signage in Dispatch',           urgency: 'standard' as const,  dueLabel: '12 days',  overdue: false },
-];
+function useDashboardData(siteId: string | undefined) {
+  const today = new Date().toISOString().split('T')[0];
 
-const DEMO_COMPLIANCE = [
-  { id: 'f1', framework: 'HACCP',  covered: 14, total: 14, status: 'green' as const  },
-  { id: 'f2', framework: 'BRCGS',  covered: 11, total: 14, status: 'amber' as const },
-  { id: 'f3', framework: 'Coles',  covered: 8,  total: 12, status: 'red' as const   },
-];
+  const preop = useQuery({
+    queryKey: ['dashboard-preop', siteId, today],
+    queryFn: async (): Promise<PreopArea[]> => {
+      const { data: areas } = await supabase
+        .from('facility_areas')
+        .select('id, name')
+        .eq('site_id', siteId!)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (!areas?.length) return [];
+
+      const { data: sessions } = await supabase
+        .from('pre_op_sessions')
+        .select('id, facility_area_id, pass_rate, status')
+        .eq('site_id', siteId!)
+        .eq('session_date', today);
+
+      return areas.map((a) => {
+        const session = sessions?.find((s) => s.facility_area_id === a.id);
+        return {
+          id: a.id,
+          area: a.name,
+          passRate: session?.status === 'complete' ? Number(session.pass_rate) : null,
+        };
+      });
+    },
+    enabled: !!siteId,
+  });
+
+  const alerts = useQuery({
+    queryKey: ['dashboard-alerts', siteId],
+    queryFn: async (): Promise<DashAlert[]> => {
+      const { data } = await supabase
+        .from('intelligence_alerts')
+        .select('id, title, description, severity')
+        .eq('site_id', siteId!)
+        .eq('status', 'active')
+        .order('generated_at', { ascending: false })
+        .limit(5);
+      return (data ?? []).map((a) => ({
+        id: a.id,
+        title: a.title,
+        description: a.description,
+        severity: a.severity as 'high' | 'medium' | 'low',
+      }));
+    },
+    enabled: !!siteId,
+  });
+
+  const capas = useQuery({
+    queryKey: ['dashboard-capas', siteId],
+    queryFn: async (): Promise<DashCapa[]> => {
+      const { data } = await supabase
+        .from('capas')
+        .select('id, title, urgency, due_date, status')
+        .eq('site_id', siteId!)
+        .in('status', ['open', 'in_progress', 'overdue'])
+        .order('due_date')
+        .limit(6);
+      const now = new Date();
+      return (data ?? []).map((c) => {
+        const due = c.due_date ? new Date(c.due_date) : null;
+        const overdue = due ? due < now : false;
+        let dueLabel = '—';
+        if (due) {
+          const diff = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          if (diff < 0) dueLabel = 'Overdue';
+          else if (diff === 0) dueLabel = 'Today';
+          else dueLabel = `${diff} day${diff === 1 ? '' : 's'}`;
+        }
+        return {
+          id: c.id,
+          title: c.title,
+          urgency: c.urgency as 'immediate' | '24hr' | '7day' | 'standard',
+          dueLabel,
+          overdue,
+        };
+      });
+    },
+    enabled: !!siteId,
+  });
+
+  const compliance = useQuery({
+    queryKey: ['dashboard-compliance', siteId],
+    queryFn: async (): Promise<DashCompliance[]> => {
+      const { data: siteFrameworks } = await supabase
+        .from('site_frameworks')
+        .select('framework_id, frameworks(id, code, name)')
+        .eq('site_id', siteId!)
+        .eq('enabled', true);
+      if (!siteFrameworks?.length) return [];
+
+      const results: DashCompliance[] = [];
+      for (const sf of siteFrameworks) {
+        const fw = (sf as Record<string, unknown>).frameworks as { id: string; code: string; name: string } | null;
+        if (!fw) continue;
+        const { count: totalCount } = await supabase
+          .from('framework_clauses')
+          .select('id', { count: 'exact', head: true })
+          .eq('framework_id', fw.id);
+        const { data: coveredItems } = await supabase
+          .from('check_item_clause_refs')
+          .select('clause_id, check_items!inner(site_id)')
+          .eq('check_items.site_id', siteId!);
+        const { data: allClauses } = await supabase
+          .from('framework_clauses')
+          .select('id')
+          .eq('framework_id', fw.id);
+        const clauseIds = new Set((allClauses ?? []).map((c) => c.id));
+        const covered = (coveredItems ?? []).filter((ci) => clauseIds.has(ci.clause_id)).length;
+        const total = totalCount ?? 0;
+        const ratio = total > 0 ? covered / total : 0;
+        results.push({
+          id: fw.id,
+          framework: fw.code.toUpperCase(),
+          covered,
+          total,
+          status: ratio >= 1 ? 'green' : ratio >= 0.7 ? 'amber' : 'red',
+        });
+      }
+      return results;
+    },
+    enabled: !!siteId,
+  });
+
+  const auditDays = useQuery({
+    queryKey: ['dashboard-last-audit', siteId],
+    queryFn: async (): Promise<number | null> => {
+      const { data } = await supabase
+        .from('audits')
+        .select('completed_at')
+        .eq('site_id', siteId!)
+        .eq('status', 'complete')
+        .order('completed_at', { ascending: false })
+        .limit(1);
+      if (!data?.length || !data[0].completed_at) return null;
+      const diff = Math.floor(
+        (Date.now() - new Date(data[0].completed_at).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return diff;
+    },
+    enabled: !!siteId,
+  });
+
+  const frameworks = useQuery({
+    queryKey: ['dashboard-frameworks', siteId],
+    queryFn: async (): Promise<string[]> => {
+      const { data } = await supabase
+        .from('site_frameworks')
+        .select('frameworks(code)')
+        .eq('site_id', siteId!)
+        .eq('enabled', true);
+      return (data ?? [])
+        .map((sf) => {
+          const fw = (sf as Record<string, unknown>).frameworks as { code: string } | null;
+          return fw?.code?.toUpperCase() ?? '';
+        })
+        .filter(Boolean);
+    },
+    enabled: !!siteId,
+  });
+
+  return { preop, alerts, capas, compliance, auditDays, frameworks };
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -85,18 +236,24 @@ export default function SiteDashboard() {
   useAuth();
 
   const basePath = `/${orgSlug}/sites/${siteSlug}`;
+  const { preop, alerts, capas, compliance, auditDays, frameworks } = useDashboardData(site?.id);
 
-  // Derive aggregate metrics from demo data
-  const completedAreas = DEMO_PREOP_AREAS.filter((a) => a.passRate !== null);
+  const preopAreas = preop.data ?? [];
+  const alertsList = alerts.data ?? [];
+  const capasList = capas.data ?? [];
+  const complianceList = compliance.data ?? [];
+  const activeFrameworks = frameworks.data ?? [];
+  const daysSinceAudit = auditDays.data;
+
+  const completedAreas = preopAreas.filter((a) => a.passRate !== null);
   const avgScore =
     completedAreas.length > 0
       ? Math.round(
           completedAreas.reduce((sum, a) => sum + (a.passRate ?? 0), 0) / completedAreas.length * 10,
         ) / 10
       : null;
-  const openCapaCount = DEMO_CAPAS.length;
-  const overdueCount = DEMO_CAPAS.filter((c) => c.overdue).length;
-  const daysSinceAudit = 18;
+  const openCapaCount = capasList.length;
+  const overdueCount = capasList.filter((c) => c.overdue).length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -110,10 +267,10 @@ export default function SiteDashboard() {
             <p className="mt-0.5 text-sm text-brand-gray dark:text-gray-400">
               {todayFormatted()}
               {' \u00b7 '}
-              {DEMO_FRAMEWORKS.map((fw, i) => (
+              {activeFrameworks.map((fw, i) => (
                 <span key={fw}>
                   <span className="font-medium text-gray-600 dark:text-gray-300">{fw}</span>
-                  {i < DEMO_FRAMEWORKS.length - 1 ? ' \u00b7 ' : ''}
+                  {i < activeFrameworks.length - 1 ? ' \u00b7 ' : ''}
                 </span>
               ))}
               {' active'}
@@ -152,7 +309,7 @@ export default function SiteDashboard() {
           {/* Since last audit */}
           <StatCard
             label="Since last audit"
-            value={`${daysSinceAudit}d`}
+            value={daysSinceAudit !== null ? `${daysSinceAudit}d` : '--'}
             color="blue"
           />
         </div>
@@ -173,15 +330,12 @@ export default function SiteDashboard() {
               </Link>
             </div>
             <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-              {DEMO_PREOP_AREAS.map((area) => (
+              {preopAreas.map((area) => (
                 <div key={area.id} className="flex items-center justify-between px-4 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{area.area}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="hidden text-xs text-brand-gray dark:text-gray-500 sm:inline">
-                      {area.operator}
-                    </span>
                     {area.passRate !== null ? (
                       <span
                         className={`inline-flex min-w-[3.5rem] justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${passRateBg(area.passRate)} ${passRateColor(area.passRate)}`}
@@ -196,7 +350,7 @@ export default function SiteDashboard() {
                   </div>
                 </div>
               ))}
-              {DEMO_PREOP_AREAS.length === 0 && (
+              {preopAreas.length === 0 && (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm text-brand-gray dark:text-gray-500">No areas configured.</p>
                 </div>
@@ -218,7 +372,7 @@ export default function SiteDashboard() {
               </Link>
             </div>
             <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-              {DEMO_ALERTS.map((alert) => (
+              {alertsList.map((alert) => (
                 <div key={alert.id} className="px-4 py-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
@@ -233,7 +387,7 @@ export default function SiteDashboard() {
                   </div>
                 </div>
               ))}
-              {DEMO_ALERTS.length === 0 && (
+              {alertsList.length === 0 && (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm text-brand-gray dark:text-gray-500">No active alerts.</p>
                 </div>
@@ -258,7 +412,7 @@ export default function SiteDashboard() {
               </Link>
             </div>
             <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-              {DEMO_CAPAS.map((capa) => (
+              {capasList.map((capa) => (
                 <Link
                   key={capa.id}
                   to={`${basePath}/capas`}
@@ -283,7 +437,7 @@ export default function SiteDashboard() {
                   </span>
                 </Link>
               ))}
-              {DEMO_CAPAS.length === 0 && (
+              {capasList.length === 0 && (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm text-brand-green">All clear — no open CAPAs.</p>
                 </div>
@@ -299,7 +453,7 @@ export default function SiteDashboard() {
               </h2>
             </div>
             <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-              {DEMO_COMPLIANCE.map((fw) => (
+              {complianceList.map((fw) => (
                 <div key={fw.id} className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-2.5">
                     <span
@@ -328,7 +482,7 @@ export default function SiteDashboard() {
                   </span>
                 </div>
               ))}
-              {DEMO_COMPLIANCE.length === 0 && (
+              {complianceList.length === 0 && (
                 <div className="px-4 py-6 text-center">
                   <p className="text-sm text-brand-gray dark:text-gray-500">No frameworks active.</p>
                 </div>

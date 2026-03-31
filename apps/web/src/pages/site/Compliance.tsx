@@ -23,7 +23,7 @@ interface ActivationNotification {
 }
 
 export default function Compliance() {
-  const { data: allFrameworks, isLoading: fwLoading } = useAllFrameworks();
+  const { data: allFrameworks, isLoading: fwLoading, isError: fwError } = useAllFrameworks();
   const { data: siteFrameworks } = useSiteFrameworks();
   const toggleFramework = useToggleFramework();
   const { data: gapData, isLoading: gapLoading } = useGapAnalysis();
@@ -116,6 +116,12 @@ export default function Compliance() {
                   className="h-16 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"
                 />
               ))}
+            </div>
+          ) : fwError ? (
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+              <p className="text-sm text-brand-gray">
+                Connect the API backend to manage framework compliance.
+              </p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">

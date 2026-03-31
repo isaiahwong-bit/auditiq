@@ -14,6 +14,7 @@ export function useAllFrameworks() {
     queryKey: ['frameworks'],
     queryFn: () =>
       apiFetch<{ data: Framework[] }>('/api/v1/frameworks').then((r) => r.data),
+    retry: false,
   });
 }
 
@@ -25,6 +26,7 @@ export function useSiteFrameworks() {
       apiFetch<{ data: (SiteFramework & { frameworks: Framework })[] }>(`${base}/frameworks`).then(
         (r) => r.data,
       ),
+    retry: false,
   });
 }
 
@@ -61,6 +63,7 @@ export function useGapAnalysis() {
           areas: AreaGapSummary[];
         };
       }>(`${base}/gaps`).then((r) => r.data),
+    retry: false,
   });
 }
 

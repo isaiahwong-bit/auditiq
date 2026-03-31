@@ -12,7 +12,7 @@ const statusStyles: Record<string, string> = {
 
 export default function Audits() {
   const { orgSlug, siteSlug } = useParams<{ orgSlug: string; siteSlug: string }>();
-  const { data: audits, isLoading } = useAudits();
+  const { data: audits, isLoading, isError } = useAudits();
   const createAudit = useCreateAudit();
   const [showCreate, setShowCreate] = useState(false);
   const [auditType, setAuditType] = useState<string>('internal');
@@ -74,6 +74,10 @@ export default function Audits() {
         {/* Audit list */}
         {isLoading ? (
           <p className="text-sm text-brand-gray">Loading audits...</p>
+        ) : isError ? (
+          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+            <p className="text-sm text-brand-gray">No audits yet. Create one to get started.</p>
+          </div>
         ) : !audits?.length ? (
           <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
             <p className="text-sm text-brand-gray">No audits yet. Create one to get started.</p>

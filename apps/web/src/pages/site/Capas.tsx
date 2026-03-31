@@ -22,7 +22,7 @@ type FilterStatus = 'all' | 'open' | 'in_progress' | 'overdue' | 'closed';
 export default function Capas() {
   const { orgSlug, siteSlug } = useParams<{ orgSlug: string; siteSlug: string }>();
   const [filter, setFilter] = useState<FilterStatus>('all');
-  const { data: capas, isLoading } = useCapas(filter === 'all' ? undefined : filter);
+  const { data: capas, isLoading, isError } = useCapas(filter === 'all' ? undefined : filter);
   const createCapa = useCreateCapa();
 
   const [showCreate, setShowCreate] = useState(false);
@@ -137,6 +137,10 @@ export default function Capas() {
         {/* CAPA list */}
         {isLoading ? (
           <p className="text-sm text-brand-gray">Loading CAPAs...</p>
+        ) : isError ? (
+          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+            <p className="text-sm text-brand-gray">No CAPAs found.</p>
+          </div>
         ) : !capas?.length ? (
           <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
             <p className="text-sm text-brand-gray">No CAPAs found.</p>

@@ -17,6 +17,7 @@ export function useCapas(status?: string) {
     queryKey: ['capas', base, status],
     queryFn: () =>
       apiFetch<{ data: CapaWithAssignee[] }>(`${base}${query}`).then((r) => r.data),
+    retry: false,
   });
 }
 
@@ -26,6 +27,7 @@ export function useCapaCount() {
     queryKey: ['capas', 'count', base],
     queryFn: () =>
       apiFetch<{ data: { count: number } }>(`${base}/count`).then((r) => r.data.count),
+    retry: false,
   });
 }
 

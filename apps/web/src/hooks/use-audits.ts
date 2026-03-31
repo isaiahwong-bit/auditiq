@@ -13,6 +13,7 @@ export function useAudits() {
   return useQuery({
     queryKey: ['audits', base],
     queryFn: () => apiFetch<{ data: Audit[] }>(base).then((r) => r.data),
+    retry: false,
   });
 }
 

@@ -20,6 +20,7 @@ export function useAlerts(status?: string) {
     queryKey: ['alerts', base, status],
     queryFn: () =>
       apiFetch<{ data: AlertWithJoins[] }>(`${base}${query}`).then((r) => r.data),
+    retry: false,
   });
 }
 
@@ -29,6 +30,7 @@ export function useAlertCount() {
     queryKey: ['alerts', 'count', base],
     queryFn: () =>
       apiFetch<{ data: { count: number } }>(`${base}/count`).then((r) => r.data.count),
+    retry: false,
   });
 }
 
