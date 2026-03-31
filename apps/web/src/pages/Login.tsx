@@ -15,6 +15,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
   const { session, profile, orgSlug, loading, signIn } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
 
   const {
     register,
@@ -28,8 +29,6 @@ export default function Login() {
   if (!loading && session && profile && orgSlug) {
     return <Navigate to={`/${orgSlug}/dashboard`} replace />;
   }
-
-  const [signingIn, setSigningIn] = useState(false);
 
   const onSubmit = async (data: LoginForm) => {
     setAuthError(null);
