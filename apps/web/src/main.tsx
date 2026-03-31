@@ -6,6 +6,7 @@ import { queryClient } from './lib/query-client';
 import { AuthProvider } from './components/auth/AuthProvider';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppLayout } from './components/ui/AppLayout';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import Login from './pages/Login';
 import OrgDashboard from './pages/org/Dashboard';
 import Sites from './pages/org/Sites';
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+          <ErrorBoundary>
           <Routes>
             {/* Public */}
             <Route path="/login" element={<Login />} />
@@ -67,6 +69,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
