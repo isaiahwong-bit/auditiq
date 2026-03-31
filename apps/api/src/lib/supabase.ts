@@ -6,7 +6,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export function createUserClient(accessToken: string) {
-  return createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY!, {
+  return createClient(supabaseUrl, supabaseServiceKey, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   });
 }

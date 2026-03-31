@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
-import { stripe } from '../lib/stripe';
+import { requireStripe } from '../lib/stripe';
 import { resend } from '../lib/resend';
 import * as billingService from '../services/billing.service';
 
@@ -18,7 +18,7 @@ webhookRoutes.post('/stripe', async (req: Request, res: Response) => {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    event = requireStripe().webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('[Stripe Webhook] Signature verification failed:', err);
     res.status(400).json({ error: 'Invalid signature' });

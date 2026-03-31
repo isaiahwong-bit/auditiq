@@ -1,20 +1,29 @@
 import { Queue, Worker } from 'bullmq';
 import { z } from 'zod';
-import { getRedisOptions } from '../lib/redis';
+import { getRedisOptions, redisAvailable } from '../lib/redis';
 import { claude } from '../lib/claude';
 import { resend } from '../lib/resend';
 import * as intelligenceService from '../services/intelligence.service';
 import * as capaService from '../services/capa.service';
 
-// ── Queue ────────────────────────────────────────────────────────────────────
+// ── Queue (lazy) ────────────────────────────────────────────────────────────
 
-export const intelligenceQueue = new Queue('intelligence', { connection: getRedisOptions() });
+let _intelligenceQueue: Queue | null = null;
+function getIntelligenceQueue(): Queue {
+  if (!_intelligenceQueue) {
+    _intelligenceQueue = new Queue('intelligence', { connection: getRedisOptions() });
+  }
+  return _intelligenceQueue;
+}
 
 // ── Schedule nightly run ─────────────────────────────────────────────────────
 
 export async function scheduleNightlyAnalysis() {
-  // Remove existing repeatable job and re-add
-  await intelligenceQueue.add(
+  if (!redisAvailable) {
+    console.warn('[Intelligence] Redis not available — skipping nightly schedule');
+    return;
+  }
+  await getIntelligenceQueue().add(
     'nightly-analysis',
     { type: 'nightly' },
     {
@@ -40,30 +49,32 @@ const alertSchema = z.object({
   ),
 });
 
-// ── Worker ───────────────────────────────────────────────────────────────────
+// ── Worker (only starts when Redis is available) ────────────────────────────
 
-export const intelligenceWorker = new Worker(
-  'intelligence',
-  async () => {
-    console.log('[Intelligence] Starting nightly analysis...');
-    const sites = await intelligenceService.getActiveSites();
+if (redisAvailable) {
+  const intelligenceWorker = new Worker(
+    'intelligence',
+    async () => {
+      console.log('[Intelligence] Starting nightly analysis...');
+      const sites = await intelligenceService.getActiveSites();
 
-    for (const site of sites) {
-      try {
-        await analyseSite(site.id, site.organisation_id);
-      } catch (err) {
-        console.error(`[Intelligence] Failed for site ${site.id}:`, err);
+      for (const site of sites) {
+        try {
+          await analyseSite(site.id, site.organisation_id);
+        } catch (err) {
+          console.error(`[Intelligence] Failed for site ${site.id}:`, err);
+        }
       }
-    }
 
-    console.log(`[Intelligence] Completed analysis for ${sites.length} sites`);
-  },
-  { connection: getRedisOptions() },
-);
+      console.log(`[Intelligence] Completed analysis for ${sites.length} sites`);
+    },
+    { connection: getRedisOptions() },
+  );
 
-intelligenceWorker.on('failed', (job, err) => {
-  console.error(`[Intelligence Job] Failed ${job?.name}: ${err.message}`);
-});
+  intelligenceWorker.on('failed', (job, err) => {
+    console.error(`[Intelligence Job] Failed ${job?.name}: ${err.message}`);
+  });
+}
 
 // ── Per-site analysis ────────────────────────────────────────────────────────
 

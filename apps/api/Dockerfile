@@ -27,4 +27,4 @@ COPY --from=base /app/package.json ./
 
 ENV NODE_ENV=production
 EXPOSE 3001
-CMD ["node", "apps/api/dist/index.js"]
+CMD ["node", "apps/api/dist/apps/api/src/index.js"]

@@ -1,5 +1,7 @@
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
+export const redisAvailable = !!process.env.REDIS_URL;
+
 export const redisConnection = {
   url: redisUrl,
 };

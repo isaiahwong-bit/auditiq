@@ -1,11 +1,17 @@
 import { Queue, Worker } from 'bullmq';
-import { getRedisOptions } from '../lib/redis';
+import { getRedisOptions, redisAvailable } from '../lib/redis';
 import { resend } from '../lib/resend';
 import * as capaService from '../services/capa.service';
 
-// ── Queues ───────────────────────────────────────────────────────────────────
+// ── Queues (lazy — only connect when Redis is available) ────────────────────
 
-export const capaQueue = new Queue('capa', { connection: getRedisOptions() });
+let _capaQueue: Queue | null = null;
+function getCapaQueue(): Queue {
+  if (!_capaQueue) {
+    _capaQueue = new Queue('capa', { connection: getRedisOptions() });
+  }
+  return _capaQueue;
+}
 
 // ── Job types ────────────────────────────────────────────────────────────────
 
@@ -28,6 +34,11 @@ type CapaJobData = CapaAssignedJob | CapaReminderJob | CapaOverdueCheckJob;
 // ── Schedule jobs on CAPA creation ──────────────────────────────────────────
 
 export async function scheduleCapaJobs(capaId: string, dueDate: string) {
+  if (!redisAvailable) {
+    console.warn('[CAPA Job] Redis not available — skipping job scheduling');
+    return;
+  }
+  const capaQueue = getCapaQueue();
   // 1. Send assignment email immediately
   await capaQueue.add('capa_assigned', {
     type: 'capa_assigned',
@@ -58,29 +69,31 @@ export async function scheduleCapaJobs(capaId: string, dueDate: string) {
   );
 }
 
-// ── Worker ───────────────────────────────────────────────────────────────────
+// ── Worker (only starts when Redis is available) ────────────────────────────
 
-export const capaWorker = new Worker<CapaJobData>(
-  'capa',
-  async (job) => {
-    switch (job.data.type) {
-      case 'capa_assigned':
-        await handleCapaAssigned(job.data.capaId);
-        break;
-      case 'capa_reminder':
-        await handleCapaReminder(job.data.capaId);
-        break;
-      case 'capa_overdue_check':
-        await handleOverdueCheck();
-        break;
-    }
-  },
-  { connection: getRedisOptions() },
-);
+if (redisAvailable) {
+  const capaWorker = new Worker<CapaJobData>(
+    'capa',
+    async (job) => {
+      switch (job.data.type) {
+        case 'capa_assigned':
+          await handleCapaAssigned(job.data.capaId);
+          break;
+        case 'capa_reminder':
+          await handleCapaReminder(job.data.capaId);
+          break;
+        case 'capa_overdue_check':
+          await handleOverdueCheck();
+          break;
+      }
+    },
+    { connection: getRedisOptions() },
+  );
 
-capaWorker.on('failed', (job, err) => {
-  console.error(`[CAPA Job] Failed ${job?.name}: ${err.message}`);
-});
+  capaWorker.on('failed', (job, err) => {
+    console.error(`[CAPA Job] Failed ${job?.name}: ${err.message}`);
+  });
+}
 
 // ── Handlers ─────────────────────────────────────────────────────────────────
 

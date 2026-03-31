@@ -1,13 +1,19 @@
 import { Queue, Worker } from 'bullmq';
-import { getRedisOptions } from '../lib/redis';
+import { getRedisOptions, redisAvailable } from '../lib/redis';
 import { supabaseAdmin } from '../lib/supabase';
 import { resend } from '../lib/resend';
 import * as reportService from '../services/report.service';
 import * as capaService from '../services/capa.service';
 
-// ── Queue ────────────────────────────────────────────────────────────────────
+// ── Queue (lazy) ────────────────────────────────────────────────────────────
 
-export const pdfQueue = new Queue('pdf', { connection: getRedisOptions() });
+let _pdfQueue: Queue | null = null;
+function getPdfQueue(): Queue {
+  if (!_pdfQueue) {
+    _pdfQueue = new Queue('pdf', { connection: getRedisOptions() });
+  }
+  return _pdfQueue;
+}
 
 // ── Job types ────────────────────────────────────────────────────────────────
 
@@ -36,7 +42,11 @@ export async function scheduleAuditReport(params: {
   organisationId: string;
   requestedBy: string;
 }) {
-  await pdfQueue.add('audit_report', {
+  if (!redisAvailable) {
+    console.warn('[PDF Job] Redis not available — skipping');
+    return;
+  }
+  await getPdfQueue().add('audit_report', {
     type: 'audit_report',
     ...params,
   });
@@ -47,32 +57,38 @@ export async function scheduleCertPack(params: {
   organisationId: string;
   requestedBy: string;
 }) {
-  await pdfQueue.add('cert_pack', {
+  if (!redisAvailable) {
+    console.warn('[PDF Job] Redis not available — skipping');
+    return;
+  }
+  await getPdfQueue().add('cert_pack', {
     type: 'cert_pack',
     ...params,
   });
 }
 
-// ── Worker ───────────────────────────────────────────────────────────────────
+// ── Worker (only starts when Redis is available) ────────────────────────────
 
-export const pdfWorker = new Worker<PdfJobData>(
-  'pdf',
-  async (job) => {
-    switch (job.data.type) {
-      case 'audit_report':
-        await generateAuditReport(job.data);
-        break;
-      case 'cert_pack':
-        await generateCertPack(job.data);
-        break;
-    }
-  },
-  { connection: getRedisOptions() },
-);
+if (redisAvailable) {
+  const pdfWorker = new Worker<PdfJobData>(
+    'pdf',
+    async (job) => {
+      switch (job.data.type) {
+        case 'audit_report':
+          await generateAuditReport(job.data);
+          break;
+        case 'cert_pack':
+          await generateCertPack(job.data);
+          break;
+      }
+    },
+    { connection: getRedisOptions() },
+  );
 
-pdfWorker.on('failed', (job, err) => {
-  console.error(`[PDF Job] Failed ${job?.name}: ${err.message}`);
-});
+  pdfWorker.on('failed', (job, err) => {
+    console.error(`[PDF Job] Failed ${job?.name}: ${err.message}`);
+  });
+}
 
 // ── Audit report generation ─────────────────────────────────────────────────
 

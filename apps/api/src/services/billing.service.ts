@@ -1,4 +1,4 @@
-import { stripe } from '../lib/stripe';
+import { requireStripe } from '../lib/stripe';
 import { supabaseAdmin } from '../lib/supabase';
 
 // ── Plan definitions ─────────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ export async function getOrCreateStripeCustomer(organisationId: string, email: s
     return org.stripe_customer_id;
   }
 
-  const customer = await stripe.customers.create({
+  const customer = await requireStripe().customers.create({
     email,
     name: org?.name,
     metadata: { organisation_id: organisationId },
@@ -48,7 +48,7 @@ export async function createCheckoutSession(params: {
   const customerId = await getOrCreateStripeCustomer(params.organisationId, params.email);
   const limits = PLAN_LIMITS[params.plan];
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await requireStripe().checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     line_items: [
@@ -102,7 +102,7 @@ export async function createPortalSession(organisationId: string, returnUrl: str
     throw new Error('No Stripe customer found for this organisation');
   }
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await requireStripe().billingPortal.sessions.create({
     customer: org.stripe_customer_id,
     return_url: returnUrl,
   });
@@ -123,7 +123,7 @@ export async function getSubscriptionStatus(organisationId: string) {
     return { plan: org?.plan ?? 'starter', status: 'no_subscription', limits: PLAN_LIMITS[org?.plan ?? 'starter'] };
   }
 
-  const subscriptions = await stripe.subscriptions.list({
+  const subscriptions = await requireStripe().subscriptions.list({
     customer: org.stripe_customer_id,
     status: 'active',
     limit: 1,
