@@ -61,10 +61,10 @@ export function useProcessDocument() {
   const base = useDocumentBase();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (params: { documentId: string; content: string }) =>
+    mutationFn: (params: { documentId: string; content?: string; image_url?: string }) =>
       apiFetch<{ data: unknown }>(`${base}/${params.documentId}/process`, {
         method: 'POST',
-        body: JSON.stringify({ content: params.content }),
+        body: JSON.stringify({ content: params.content, image_url: params.image_url }),
       }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });

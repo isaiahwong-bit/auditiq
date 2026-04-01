@@ -115,7 +115,10 @@ const FINDING_CATEGORIES = [
   'internal_audit', 'management_review', 'corrective_action_effectiveness',
 ] as const;
 
-export async function processDocument(documentId: string, content: string) {
+export async function processDocument(
+  documentId: string,
+  input: { content?: string; imageUrl?: string },
+) {
   // 1. Set status to 'processing'
   const { error: updateError } = await supabaseAdmin
     .from('uploaded_documents')
@@ -124,27 +127,14 @@ export async function processDocument(documentId: string, content: string) {
   if (updateError) throw updateError;
 
   try {
-    // 2. Call Claude to extract facility areas and check items
-    const response = await claude.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: `You are a food safety document analysis engine for Australian food manufacturers. You extract facility areas and pre-operational check items from uploaded documents (pre-op checklists, HACCP plans, scope of works).
+    const systemPrompt = `You are a food safety document analysis engine for Australian food manufacturers. You extract facility areas and pre-operational check items from uploaded documents (pre-op checklists, HACCP plans, scope of works).
 
 For each area, identify all check items with their appropriate scoring type and frequency. Map each check item to one of these 40 finding category codes:
 ${FINDING_CATEGORIES.join(', ')}
 
-Respond with JSON only, no prose.`,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyse this document and extract facility areas with their check items.
+Respond with JSON only, no prose.`;
 
-Document content:
-"""
-${content}
-"""
-
-Respond with JSON:
+    const jsonInstructions = `Respond with JSON:
 {
   "areas": [
     {
@@ -170,9 +160,38 @@ Respond with JSON:
       "description": "what is missing"
     }
   ]
-}`,
-        },
-      ],
+}`;
+
+    // Build message content — text or image (vision)
+    const userContent: Array<
+      | { type: 'text'; text: string }
+      | { type: 'image'; source: { type: 'url'; url: string } }
+    > = [];
+
+    if (input.imageUrl) {
+      userContent.push({
+        type: 'image',
+        source: { type: 'url', url: input.imageUrl },
+      });
+      userContent.push({
+        type: 'text',
+        text: `Analyse this document image and extract all facility areas with their check items.\n\n${jsonInstructions}`,
+      });
+    } else if (input.content) {
+      userContent.push({
+        type: 'text',
+        text: `Analyse this document and extract facility areas with their check items.\n\nDocument content:\n"""\n${input.content}\n"""\n\n${jsonInstructions}`,
+      });
+    } else {
+      throw new Error('Either content or imageUrl must be provided');
+    }
+
+    // 2. Call Claude (vision-capable model handles both text and images)
+    const response = await claude.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';

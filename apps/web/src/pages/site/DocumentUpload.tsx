@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PageHeader } from '../../components/ui/PageHeader';
+import { supabase } from '../../lib/supabase';
 import {
   useDocuments,
   useDocument,
@@ -99,6 +100,7 @@ export default function DocumentUpload() {
   const [docType, setDocType] = useState<string>('pre_op_checklist');
   const [docName, setDocName] = useState('');
   const [docContent, setDocContent] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Review state
@@ -126,57 +128,85 @@ export default function DocumentUpload() {
     setIsDragging(false);
   }, []);
 
+  const isImageOrPdf = (file: File) =>
+    file.type.startsWith('image/') || file.type === 'application/pdf';
+
+  const handleFile = useCallback((file: File) => {
+    setDocName(file.name);
+    if (isImageOrPdf(file)) {
+      setSelectedFile(file);
+      setDocContent('');
+    } else {
+      setSelectedFile(null);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target?.result;
+        if (typeof text === 'string') setDocContent(text);
+      };
+      reader.readAsText(file);
+    }
+  }, []);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) {
-      setDocName(file.name);
-      // Read text content from the file
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const text = ev.target?.result;
-        if (typeof text === 'string') {
-          setDocContent(text);
-        }
-      };
-      reader.readAsText(file);
-    }
-  }, []);
+    if (file) handleFile(file);
+  }, [handleFile]);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setDocName(file.name);
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const text = ev.target?.result;
-        if (typeof text === 'string') {
-          setDocContent(text);
-        }
-      };
-      reader.readAsText(file);
-    }
-  }, []);
+    if (file) handleFile(file);
+  }, [handleFile]);
 
   const handleUploadAndProcess = useCallback(async () => {
-    if (!docContent.trim()) return;
+    if (!docContent.trim() && !selectedFile) return;
 
     const fileName = docName.trim() || 'Pasted document';
 
     try {
-      // Create the document record (file_url is a placeholder since content is pasted)
+      let fileUrl = `text://${fileName}`;
+      let imageUrl: string | undefined;
+
+      // If we have a file (image or PDF), upload to Supabase Storage
+      if (selectedFile) {
+        const ext = selectedFile.name.split('.').pop() ?? 'bin';
+        const storagePath = `documents/${Date.now()}-${selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, selectedFile, { contentType: selectedFile.type });
+
+        if (uploadError) {
+          // Try creating the bucket if it doesn't exist
+          if (uploadError.message.includes('not found') || uploadError.message.includes('Bucket')) {
+            await supabase.storage.createBucket('documents', { public: true });
+            const { error: retryError } = await supabase.storage
+              .from('documents')
+              .upload(storagePath, selectedFile, { contentType: selectedFile.type });
+            if (retryError) throw retryError;
+          } else {
+            throw uploadError;
+          }
+        }
+
+        const { data: urlData } = supabase.storage.from('documents').getPublicUrl(storagePath);
+        fileUrl = urlData.publicUrl;
+        imageUrl = fileUrl;
+      }
+
+      // Create the document record
       const doc = await uploadDocument.mutateAsync({
-        file_url: `text://${fileName}`,
+        file_url: fileUrl,
         file_name: fileName,
         document_type: docType,
-        content: docContent,
       });
 
-      // Trigger processing immediately
+      // Trigger processing — with image URL or text content
       await processDocument.mutateAsync({
         documentId: doc.id,
-        content: docContent,
+        content: docContent.trim() || undefined,
+        image_url: imageUrl,
       });
 
       // Select the document to show results
@@ -184,11 +214,12 @@ export default function DocumentUpload() {
       setShowUpload(false);
       setDocName('');
       setDocContent('');
+      setSelectedFile(null);
       setExpandedAreas(new Set());
     } catch {
       // Error is surfaced by TanStack Query
     }
-  }, [docContent, docName, docType, uploadDocument, processDocument]);
+  }, [docContent, docName, docType, selectedFile, uploadDocument, processDocument]);
 
   const handleApprove = useCallback(
     async (documentId: string) => {
@@ -307,24 +338,36 @@ export default function DocumentUpload() {
               >
                 <UploadIcon />
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  Drag and drop a text file here, or{' '}
+                  Drag and drop a file here, or{' '}
                   <label className="cursor-pointer font-medium text-brand-green hover:text-brand-green/80">
                     browse
                     <input
                       type="file"
-                      accept=".txt,.csv,.md,.doc,.docx"
+                      accept=".txt,.csv,.md,.doc,.docx,.pdf,.png,.jpg,.jpeg,.webp,.heic"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
                   </label>
                 </p>
                 <p className="mt-1 text-xs text-brand-gray">
-                  Supports text files. PDF parsing coming soon.
+                  Images (PNG, JPG), PDFs, or text files. AI reads documents directly.
                 </p>
                 {docName && (
-                  <p className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Selected: {docName}
-                  </p>
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      Selected: {docName}
+                    </p>
+                    {selectedFile?.type.startsWith('image/') && (
+                      <img
+                        src={URL.createObjectURL(selectedFile)}
+                        alt="Preview"
+                        className="mt-2 mx-auto max-h-48 rounded-lg border border-gray-200 dark:border-gray-600"
+                      />
+                    )}
+                    {selectedFile?.type === 'application/pdf' && (
+                      <p className="mt-1 text-xs text-brand-blue">PDF will be analysed by AI vision</p>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -366,7 +409,7 @@ export default function DocumentUpload() {
               {/* Submit */}
               <button
                 onClick={handleUploadAndProcess}
-                disabled={!docContent.trim() || isProcessing}
+                disabled={(!docContent.trim() && !selectedFile) || isProcessing}
                 className="rounded-lg bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-brand-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isProcessing ? (

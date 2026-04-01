@@ -54,7 +54,10 @@ documentRoutes.post('/', async (req, res, next) => {
 
 // POST /:documentId/process — trigger AI extraction
 const processDocumentSchema = z.object({
-  content: z.string().min(1, 'Document content is required for extraction'),
+  content: z.string().optional(),
+  image_url: z.string().optional(),
+}).refine((d) => d.content || d.image_url, {
+  message: 'Either content or image_url is required',
 });
 
 documentRoutes.post('/:documentId/process', async (req, res, next) => {
@@ -62,7 +65,7 @@ documentRoutes.post('/:documentId/process', async (req, res, next) => {
     const body = processDocumentSchema.parse(req.body);
     const result = await documentService.processDocument(
       req.params.documentId,
-      body.content,
+      { content: body.content, imageUrl: body.image_url },
     );
     res.json({ data: result });
   } catch (err) {
