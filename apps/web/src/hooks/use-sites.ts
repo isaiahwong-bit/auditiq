@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Site } from '@auditarmour/types';
 
@@ -45,4 +45,38 @@ export function useSites(organisationId: string | undefined) {
   });
 
   return { sites: sites ?? [], loading: isLoading };
+}
+
+export function useCreateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      organisation_id: string;
+      name: string;
+      slug: string;
+      address?: string;
+      site_type?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('sites')
+        .insert(params)
+        .select()
+        .single();
+      if (error) throw error;
+
+      // Auto-add the current user to site_users
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('site_users')
+          .insert({ user_id: user.id, site_id: data.id })
+          .single();
+      }
+
+      return data as Site;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+    },
+  });
 }
