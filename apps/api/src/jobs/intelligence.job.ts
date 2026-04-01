@@ -87,7 +87,7 @@ async function analyseSite(siteId: string, organisationId: string) {
   const summary = buildResponseSummary(responses);
 
   const response = await claude.messages.create({
-    model: 'claude-sonnet-4-6-20250514',
+    model: 'claude-sonnet-4-5-20241022',
     max_tokens: 1024,
     system: `You are a food safety intelligence analyst. Analyse 30 days of pre-operational check data and identify:
 - Declining trends (pass rates dropping over time)
