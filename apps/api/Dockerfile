@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
 COPY packages/types/package.json packages/types/
-RUN npm ci --workspace=apps/api --workspace=packages/types --include-workspace-root
+RUN npm install --workspace=apps/api --workspace=packages/types --include-workspace-root
 
 # Copy source
 COPY tsconfig.base.json ./
