@@ -238,6 +238,9 @@ export default function SiteDashboard() {
   const basePath = `/${orgSlug}/sites/${siteSlug}`;
   const { preop, alerts, capas, compliance, auditDays, frameworks } = useDashboardData(site?.id);
 
+  const isLoading =
+    preop.isLoading || alerts.isLoading || capas.isLoading || compliance.isLoading || auditDays.isLoading || frameworks.isLoading;
+
   const preopAreas = preop.data ?? [];
   const alertsList = alerts.data ?? [];
   const capasList = capas.data ?? [];
@@ -254,6 +257,10 @@ export default function SiteDashboard() {
       : null;
   const openCapaCount = capasList.length;
   const overdueCount = capasList.filter((c) => c.overdue).length;
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -573,4 +580,79 @@ function UrgencyDot({ urgency }: { urgency: 'immediate' | '24hr' | '7day' | 'sta
   }[urgency];
 
   return <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />;
+}
+
+// ── Loading Skeleton ───────────────────────────────────────────────────────
+
+function SkeletonBox({ className }: { className: string }) {
+  return <div className={`animate-pulse rounded bg-gray-200 dark:bg-gray-700 ${className}`} />;
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Header skeleton */}
+      <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-5 md:px-8">
+        <div className="flex items-start justify-between">
+          <div>
+            <SkeletonBox className="h-6 w-48" />
+            <SkeletonBox className="mt-2 h-4 w-72" />
+          </div>
+          <SkeletonBox className="h-9 w-24 rounded-md" />
+        </div>
+      </div>
+
+      <div className="px-6 py-6 md:px-8 space-y-6">
+        {/* Row 1: Metric cards skeleton */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3">
+              <SkeletonBox className="h-8 w-16" />
+              <SkeletonBox className="mt-2 h-3 w-24" />
+            </div>
+          ))}
+        </div>
+
+        {/* Row 2: Two panels skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[1, 2].map((panel) => (
+            <div key={panel} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-4 py-3">
+                <SkeletonBox className="h-3 w-32" />
+                <SkeletonBox className="h-3 w-14" />
+              </div>
+              <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                {[1, 2, 3, 4].map((row) => (
+                  <div key={row} className="flex items-center justify-between px-4 py-3">
+                    <SkeletonBox className="h-4 w-40" />
+                    <SkeletonBox className="h-5 w-14 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Row 3: Two panels skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[1, 2].map((panel) => (
+            <div key={panel} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-4 py-3">
+                <SkeletonBox className="h-3 w-28" />
+                <SkeletonBox className="h-3 w-14" />
+              </div>
+              <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                {[1, 2, 3].map((row) => (
+                  <div key={row} className="flex items-center justify-between px-4 py-3">
+                    <SkeletonBox className="h-4 w-44" />
+                    <SkeletonBox className="h-4 w-10" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

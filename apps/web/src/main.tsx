@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -7,27 +7,37 @@ import { AuthProvider } from './components/auth/AuthProvider';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppLayout } from './components/ui/AppLayout';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
-import Login from './pages/Login';
-import OrgDashboard from './pages/org/Dashboard';
-import Sites from './pages/org/Sites';
-import OrgSettings from './pages/org/Settings';
-import SiteDashboard from './pages/site/SiteDashboard';
-import Audits from './pages/site/Audits';
-import PreOpChecks from './pages/site/PreOpChecks';
-import Capas from './pages/site/Capas';
-import CapaDetail from './pages/site/CapaDetail';
-import Intelligence from './pages/site/Intelligence';
-import Compliance from './pages/site/Compliance';
-import SiteSettings from './pages/site/SiteSettings';
-import FacilityConfig from './pages/site/FacilityConfig';
-import AuditDetail from './pages/site/AuditDetail';
-import PreOpStart from './pages/site/PreOpStart';
-import PreOpSession from './pages/site/PreOpSession';
-import PreOpSummary from './pages/site/PreOpSummary';
-import Reports from './pages/site/Reports';
-import DocumentUpload from './pages/site/DocumentUpload';
-import Admin from './pages/Admin';
 import './index.css';
+
+// Lazy-loaded page components for code splitting
+const Login = lazy(() => import('./pages/Login'));
+const OrgDashboard = lazy(() => import('./pages/org/Dashboard'));
+const Sites = lazy(() => import('./pages/org/Sites'));
+const OrgSettings = lazy(() => import('./pages/org/Settings'));
+const SiteDashboard = lazy(() => import('./pages/site/SiteDashboard'));
+const Audits = lazy(() => import('./pages/site/Audits'));
+const AuditDetail = lazy(() => import('./pages/site/AuditDetail'));
+const PreOpChecks = lazy(() => import('./pages/site/PreOpChecks'));
+const PreOpStart = lazy(() => import('./pages/site/PreOpStart'));
+const PreOpSession = lazy(() => import('./pages/site/PreOpSession'));
+const PreOpSummary = lazy(() => import('./pages/site/PreOpSummary'));
+const Capas = lazy(() => import('./pages/site/Capas'));
+const CapaDetail = lazy(() => import('./pages/site/CapaDetail'));
+const Intelligence = lazy(() => import('./pages/site/Intelligence'));
+const Compliance = lazy(() => import('./pages/site/Compliance'));
+const SiteSettings = lazy(() => import('./pages/site/SiteSettings'));
+const FacilityConfig = lazy(() => import('./pages/site/FacilityConfig'));
+const DocumentUpload = lazy(() => import('./pages/site/DocumentUpload'));
+const Reports = lazy(() => import('./pages/site/Reports'));
+const Admin = lazy(() => import('./pages/Admin'));
+
+function PageSpinner() {
+  return (
+    <div className="flex h-screen w-full items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-green" />
+    </div>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -35,6 +45,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <AuthProvider>
           <ErrorBoundary>
+          <Suspense fallback={<PageSpinner />}>
           <Routes>
             {/* Public */}
             <Route path="/login" element={<Login />} />
@@ -73,6 +84,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+          </Suspense>
           </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
