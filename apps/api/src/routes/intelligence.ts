@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as intelligenceService from '../services/intelligence.service';
+import { analyseSite } from '../jobs/intelligence.job';
 
 export const intelligenceRoutes = Router();
 
@@ -32,6 +33,17 @@ intelligenceRoutes.post('/:alertId/acknowledge', async (req, res, next) => {
       req.user!.id,
     );
     res.json({ data: alert });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /analyse — manually trigger intelligence analysis for this site
+intelligenceRoutes.post('/analyse', async (req, res, next) => {
+  try {
+    await analyseSite(req.site!.id, req.org!.id);
+    const alerts = await intelligenceService.listAlerts(req.site!.id, 'active');
+    res.json({ data: { message: 'Analysis complete', alerts_created: alerts.length } });
   } catch (err) {
     next(err);
   }

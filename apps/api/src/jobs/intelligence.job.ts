@@ -78,7 +78,7 @@ if (redisAvailable) {
 
 // ── Per-site analysis ────────────────────────────────────────────────────────
 
-async function analyseSite(siteId: string, organisationId: string) {
+export async function analyseSite(siteId: string, organisationId: string) {
   const responses = await intelligenceService.get30DayResponses(siteId);
 
   if (responses.length === 0) return;
@@ -110,7 +110,8 @@ Return an empty alerts array if no concerning patterns are detected.`,
     ],
   });
 
-  const text = response.content[0].type === 'text' ? response.content[0].text : '{"alerts":[]}';
+  const rawText = response.content[0].type === 'text' ? response.content[0].text : '{"alerts":[]}';
+  const text = rawText.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
   const parsed = alertSchema.parse(JSON.parse(text));
 
   // Create alerts
