@@ -39,3 +39,4 @@ Screenshot*.png
 
 # Supabase temp
 supabase/.temp/
+.vercel

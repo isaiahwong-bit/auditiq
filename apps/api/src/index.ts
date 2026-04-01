@@ -61,7 +61,7 @@ orgRouter.use('/sites/:siteSlug', siteRouter);
 orgRouter.use('/billing', billingRoutes);
 app.use('/api/v1/org/:orgSlug', orgRouter);
 
-// Admin routes — protected by AUDITIQ_ADMIN_SECRET header, not Supabase auth
+// Admin routes — protected by AUDITARMOUR_ADMIN_SECRET header, not Supabase auth
 app.use('/api/admin', adminRoutes);
 
 // AI routes — auth required but not org/site scoped (site context passed in body)
@@ -71,7 +71,7 @@ app.use('/api/v1/ai', aiRoutes);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`AuditIQ API running on port ${PORT}`);
+  console.log(`AuditArmour API running on port ${PORT}`);
 });
 
 export default app;

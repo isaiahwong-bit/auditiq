@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import type { Site } from '@auditiq/types';
+import type { Site } from '@auditarmour/types';
 
 const DEMO_MODE = !import.meta.env.VITE_SUPABASE_URL;
 

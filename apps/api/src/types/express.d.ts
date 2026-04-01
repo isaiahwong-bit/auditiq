@@ -1,4 +1,4 @@
-import { UserProfile, Organisation, Site } from '@auditiq/types';
+import { UserProfile, Organisation, Site } from '@auditarmour/types';
 
 declare global {
   namespace Express {

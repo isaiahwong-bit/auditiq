@@ -52,7 +52,7 @@ export default function Admin() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md">
-          <h1 className="mb-4 text-xl font-bold text-gray-900">AuditIQ Admin</h1>
+          <h1 className="mb-4 text-xl font-bold text-gray-900">AuditArmour Admin</h1>
           <input
             type="password"
             value={secret}
@@ -75,7 +75,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageHeader title="AuditIQ Admin" description="Platform administration" />
+      <PageHeader title="AuditArmour Admin" description="Platform administration" />
       <div className="p-6 md:p-8">
         {/* Platform stats */}
         {stats && (

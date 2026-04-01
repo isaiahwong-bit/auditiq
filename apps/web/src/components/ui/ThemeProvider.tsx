@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { ThemeContext, type Theme } from '../../lib/theme-context';
 
-const STORAGE_KEY = 'auditiq-theme';
+const STORAGE_KEY = 'auditarmour-theme';
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light';

@@ -5,7 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "paths": {
-      "@auditiq/types": ["../../packages/types/src"]
+      "@auditarmour/types": ["../../packages/types/src"]
     }
   },
   "include": ["src"]

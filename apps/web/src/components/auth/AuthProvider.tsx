@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import type { UserProfile } from '@auditiq/types';
+import type { UserProfile } from '@auditarmour/types';
 import { supabase } from '../../lib/supabase';
 import { AuthContext } from '../../lib/auth-context';
 
@@ -15,7 +15,7 @@ const DEMO_PROFILE: UserProfile = {
 };
 
 const DEMO_SESSION = { access_token: 'demo', refresh_token: 'demo' } as unknown as Session;
-const DEMO_USER = { id: 'demo-user-id', email: 'demo@auditiq.com.au' } as unknown as User;
+const DEMO_USER = { id: 'demo-user-id', email: 'demo@auditarmour.com.au' } as unknown as User;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(DEMO_MODE ? DEMO_SESSION : null);

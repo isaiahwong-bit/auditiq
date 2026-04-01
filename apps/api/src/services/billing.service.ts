@@ -56,7 +56,7 @@ export async function createCheckoutSession(params: {
         price_data: {
           currency: 'aud',
           product_data: {
-            name: `AuditIQ ${params.plan.charAt(0).toUpperCase() + params.plan.slice(1)}`,
+            name: `AuditArmour ${params.plan.charAt(0).toUpperCase() + params.plan.slice(1)}`,
             description: `${limits?.site_limit ?? 1} site(s), ${limits?.audit_limit ?? 'unlimited'} audits/mo`,
           },
           unit_amount: getPlanPrice(params.plan),

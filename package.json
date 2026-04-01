@@ -1,5 +1,5 @@
 {
-  "name": "auditiq",
+  "name": "auditarmour",
   "private": true,
   "workspaces": [
     "apps/*",

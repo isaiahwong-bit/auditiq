@@ -10,7 +10,7 @@ export default function Invite(_props: Props) {
       <Head />
       <Body style={{ fontFamily: 'sans-serif', padding: '20px' }}>
         <Container>
-          <Heading>You're Invited to AuditIQ</Heading>
+          <Heading>You're Invited to AuditArmour</Heading>
           <Text>TODO: implement template</Text>
         </Container>
       </Body>

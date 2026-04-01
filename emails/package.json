@@ -1,5 +1,5 @@
 {
-  "name": "@auditiq/emails",
+  "name": "@auditarmour/emails",
   "version": "0.0.1",
   "private": true,
   "dependencies": {

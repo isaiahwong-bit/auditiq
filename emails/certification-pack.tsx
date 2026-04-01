@@ -74,7 +74,7 @@ export default function CertificationPack({
             View Evidence Package
           </Link>
           <Text style={{ color: '#888780', fontSize: '12px', marginTop: '24px' }}>
-            AuditIQ &middot; Food Safety Compliance Platform
+            AuditArmour &middot; Food Safety Compliance Platform
           </Text>
         </Container>
       </Body>

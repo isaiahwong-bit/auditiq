@@ -38,7 +38,7 @@ export function Sidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-green text-sm font-bold text-white">
             A
           </div>
-          <span className="text-lg font-bold text-gray-900 dark:text-white">AuditIQ</span>
+          <span className="text-lg font-bold text-gray-900 dark:text-white">AuditArmour</span>
         </NavLink>
         {org && (
           <p className="mt-1 truncate text-xs text-brand-gray">{org.name}</p>

@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import type { UserProfile } from '@auditiq/types';
+import type { UserProfile } from '@auditarmour/types';
 
 export interface AuthState {
   session: Session | null;

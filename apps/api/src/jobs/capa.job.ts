@@ -105,7 +105,7 @@ async function handleCapaAssigned(capaId: string) {
   if (!email) return;
 
   await resend.emails.send({
-    from: 'AuditIQ <notifications@auditiq.com.au>',
+    from: 'AuditArmour <notifications@auditarmour.com.au>',
     to: email,
     subject: `CAPA Assigned: ${capa.title}`,
     html: `
@@ -114,7 +114,7 @@ async function handleCapaAssigned(capaId: string) {
       <p><strong>Urgency:</strong> ${capa.urgency}</p>
       <p><strong>Due date:</strong> ${capa.due_date ? new Date(capa.due_date).toLocaleDateString('en-AU') : 'Not set'}</p>
       ${capa.description ? `<p><strong>Description:</strong> ${capa.description}</p>` : ''}
-      <p>Log in to AuditIQ to view and take action.</p>
+      <p>Log in to AuditArmour to view and take action.</p>
     `,
   });
 }
@@ -128,7 +128,7 @@ async function handleCapaReminder(capaId: string) {
   if (!email) return;
 
   await resend.emails.send({
-    from: 'AuditIQ <notifications@auditiq.com.au>',
+    from: 'AuditArmour <notifications@auditarmour.com.au>',
     to: email,
     subject: `CAPA Reminder: ${capa.title} — due in 24 hours`,
     html: `

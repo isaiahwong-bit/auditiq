@@ -1,5 +1,5 @@
 -- =============================================================================
--- AuditIQ Seed Data
+-- AuditArmour Seed Data
 -- Frameworks, finding categories with keywords, and representative clauses
 -- for HACCP, BRCGS, and Coles.
 -- =============================================================================

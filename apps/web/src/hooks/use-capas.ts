@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import type { Capa } from '@auditiq/types';
+import type { Capa } from '@auditarmour/types';
 
 function useCapaBase() {
   const { orgSlug, siteSlug } = useParams<{ orgSlug: string; siteSlug: string }>();

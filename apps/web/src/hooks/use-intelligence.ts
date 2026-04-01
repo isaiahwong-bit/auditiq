@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import type { IntelligenceAlert } from '@auditiq/types';
+import type { IntelligenceAlert } from '@auditarmour/types';
 
 function useIntelBase() {
   const { orgSlug, siteSlug } = useParams<{ orgSlug: string; siteSlug: string }>();

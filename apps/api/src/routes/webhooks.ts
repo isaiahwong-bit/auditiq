@@ -59,12 +59,12 @@ webhookRoutes.post('/stripe', async (req: Request, res: Response) => {
         const customerEmail = invoice.customer_email;
         if (customerEmail) {
           await resend.emails.send({
-            from: 'AuditIQ <billing@auditiq.com.au>',
+            from: 'AuditArmour <billing@auditarmour.com.au>',
             to: customerEmail,
-            subject: 'Payment Failed — AuditIQ',
+            subject: 'Payment Failed — AuditArmour',
             html: `
               <h2>Payment Failed</h2>
-              <p>We were unable to process your payment for your AuditIQ subscription.</p>
+              <p>We were unable to process your payment for your AuditArmour subscription.</p>
               <p>Please update your payment method within 7 days to avoid service interruption.</p>
               <p>Your data will be retained — no data will be deleted.</p>
             `,

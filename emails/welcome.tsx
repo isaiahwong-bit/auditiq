@@ -10,7 +10,7 @@ export default function Welcome(_props: Props) {
       <Head />
       <Body style={{ fontFamily: 'sans-serif', padding: '20px' }}>
         <Container>
-          <Heading>Welcome to AuditIQ</Heading>
+          <Heading>Welcome to AuditArmour</Heading>
           <Text>TODO: implement template</Text>
         </Container>
       </Body>

@@ -135,14 +135,14 @@ Return an empty alerts array if no concerning patterns are detected.`,
         const email = await capaService.getAssigneeEmail(manager.id);
         if (email) {
           await resend.emails.send({
-            from: 'AuditIQ <notifications@auditiq.com.au>',
+            from: 'AuditArmour <notifications@auditarmour.com.au>',
             to: email,
             subject: `Intelligence Alert: ${alert.title}`,
             html: `
               <h2>High Severity Intelligence Alert</h2>
               <p><strong>${alert.title}</strong></p>
               <p>${alert.description}</p>
-              <p>Log in to AuditIQ to review and take action.</p>
+              <p>Log in to AuditArmour to review and take action.</p>
             `,
           });
         }

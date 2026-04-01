@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import type { FacilityArea, CheckItem, PreOpSession, PreOpResponse } from '@auditiq/types';
+import type { FacilityArea, CheckItem, PreOpSession, PreOpResponse } from '@auditarmour/types';
 
 function usePreopBase() {
   const { orgSlug, siteSlug } = useParams<{ orgSlug: string; siteSlug: string }>();

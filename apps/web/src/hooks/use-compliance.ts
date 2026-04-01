@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import type { Framework, SiteFramework, RectificationPlan } from '@auditiq/types';
+import type { Framework, SiteFramework, RectificationPlan } from '@auditarmour/types';
 import type { AreaGapSummary } from './use-compliance-types';
 
 function useComplianceBase() {

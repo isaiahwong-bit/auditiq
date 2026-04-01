@@ -5,7 +5,7 @@ import {
   useAcknowledgeAlert,
   useResolveAlert,
 } from '../../hooks/use-intelligence';
-import type { IntelligenceAlert } from '@auditiq/types';
+import type { IntelligenceAlert } from '@auditarmour/types';
 
 const severityStyles: Record<string, string> = {
   high: 'bg-brand-red-light text-brand-red border-brand-red/20',

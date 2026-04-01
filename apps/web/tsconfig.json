@@ -5,7 +5,7 @@
     "outDir": "dist",
     "paths": {
       "@/*": ["./src/*"],
-      "@auditiq/types": ["../../packages/types/src"]
+      "@auditarmour/types": ["../../packages/types/src"]
     }
   },
   "include": ["src"]
