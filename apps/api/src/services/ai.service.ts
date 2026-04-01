@@ -29,6 +29,11 @@ const narrativeSchema = z.object({
 export type ClassificationResult = z.infer<typeof classificationSchema>;
 export type NarrativeResult = z.infer<typeof narrativeSchema>;
 
+function extractJson(text: string): string {
+  const stripped = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+  return stripped.trim();
+}
+
 // ── Step 1: Classification (claude-sonnet-4-6) ──────────────────────────────
 
 export async function classifyObservation(
@@ -65,7 +70,7 @@ Respond with JSON: { "category_code": string, "confidence": number (0-1), "risk_
   });
 
   const text = response.content[0].type === 'text' ? response.content[0].text : '';
-  const parsed = JSON.parse(text);
+  const parsed = JSON.parse(extractJson(text));
   return classificationSchema.parse(parsed);
 }
 
@@ -150,7 +155,7 @@ Respond with JSON:
   });
 
   const text = response.content[0].type === 'text' ? response.content[0].text : '';
-  const parsed = JSON.parse(text);
+  const parsed = JSON.parse(extractJson(text));
   return narrativeSchema.parse(parsed);
 }
 
