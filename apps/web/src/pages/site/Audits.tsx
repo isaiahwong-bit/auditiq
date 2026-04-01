@@ -4,10 +4,10 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { useAudits, useCreateAudit } from '../../hooks/use-audits';
 
 const statusStyles: Record<string, string> = {
-  draft: 'bg-brand-gray-light text-brand-gray',
-  in_progress: 'bg-brand-blue-light text-brand-blue',
-  complete: 'bg-brand-green-light text-brand-green',
-  reported: 'bg-brand-amber-light text-brand-amber',
+  draft: 'bg-gray-100/80 text-gray-600 dark:bg-white/10 dark:text-gray-400',
+  in_progress: 'bg-blue-50/80 text-brand-blue dark:bg-blue-500/10 dark:text-blue-400',
+  complete: 'bg-emerald-50/80 text-brand-green dark:bg-emerald-500/10 dark:text-emerald-400',
+  reported: 'bg-amber-50/80 text-brand-amber dark:bg-amber-500/10 dark:text-amber-400',
 };
 
 export default function Audits() {
@@ -23,14 +23,14 @@ export default function Audits() {
   };
 
   return (
-    <div>
+    <div className="bg-transparent">
       <PageHeader
         title="Audits"
         description="Internal and third-party audit records"
         actions={
           <button
             onClick={() => setShowCreate(true)}
-            className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
+            className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
           >
             New Audit
           </button>
@@ -39,14 +39,14 @@ export default function Audits() {
       <div className="p-6 md:p-8">
         {/* Create modal */}
         {showCreate && (
-          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">Create New Audit</h3>
+          <div className="mb-6 rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">Create New Audit</h3>
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Audit Type</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Audit Type</label>
               <select
                 value={auditType}
                 onChange={(e) => setAuditType(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-white/5 dark:text-white"
               >
                 <option value="internal">Internal</option>
                 <option value="third_party">Third Party</option>
@@ -57,13 +57,13 @@ export default function Audits() {
               <button
                 onClick={handleCreate}
                 disabled={createAudit.isPending}
-                className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
               >
                 {createAudit.isPending ? 'Creating...' : 'Create'}
               </button>
               <button
                 onClick={() => setShowCreate(false)}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50/50 transition-colors dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 Cancel
               </button>
@@ -73,14 +73,14 @@ export default function Audits() {
 
         {/* Audit list */}
         {isLoading ? (
-          <p className="text-sm text-brand-gray">Loading audits...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading audits...</p>
         ) : isError ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
-            <p className="text-sm text-brand-gray">No audits yet. Create one to get started.</p>
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-6 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No audits yet. Create one to get started.</p>
           </div>
         ) : !audits?.length ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <p className="text-sm text-brand-gray">No audits yet. Create one to get started.</p>
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-6 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No audits yet. Create one to get started.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -88,24 +88,24 @@ export default function Audits() {
               <Link
                 key={audit.id}
                 to={`/${orgSlug}/sites/${siteSlug}/audits/${audit.id}`}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 hover:bg-gray-50"
+                className="flex items-center justify-between rounded-xl bg-white/70 backdrop-blur-xl px-4 py-3.5 shadow-sm border border-white/20 hover:bg-gray-50/50 transition-colors dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {audit.audit_type?.replace('_', ' ')} audit
                   </p>
-                  <p className="text-xs text-brand-gray">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(audit.created_at).toLocaleDateString('en-AU')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {audit.overall_score !== null && (
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {audit.overall_score}%
                     </span>
                   )}
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[audit.status] ?? ''}`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[audit.status] ?? ''}`}
                   >
                     {audit.status.replace('_', ' ')}
                   </span>

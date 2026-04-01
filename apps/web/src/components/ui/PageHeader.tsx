@@ -8,15 +8,19 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <div className="border-b border-gray-200 bg-white px-6 py-4 md:px-8 dark:bg-gray-900 dark:border-gray-800">
+    <div className="bg-white/70 backdrop-blur-xl px-6 py-5 md:px-8 dark:bg-white/5 dark:backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {title}
+          </h1>
           {description && (
-            <p className="mt-0.5 text-sm text-brand-gray">{description}</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {description}
+            </p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        {actions && <div className="flex items-center gap-3">{actions}</div>}
       </div>
     </div>
   );

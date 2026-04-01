@@ -4,10 +4,10 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { useCapas, useCreateCapa } from '../../hooks/use-capas';
 
 const statusStyles: Record<string, string> = {
-  open: 'bg-brand-blue-light text-brand-blue',
-  in_progress: 'bg-brand-amber-light text-brand-amber',
-  closed: 'bg-brand-green-light text-brand-green',
-  overdue: 'bg-brand-red-light text-brand-red',
+  open: 'bg-blue-50/80 text-brand-blue dark:bg-blue-500/10 dark:text-blue-400',
+  in_progress: 'bg-amber-50/80 text-brand-amber dark:bg-amber-500/10 dark:text-amber-400',
+  closed: 'bg-emerald-50/80 text-brand-green dark:bg-emerald-500/10 dark:text-emerald-400',
+  overdue: 'bg-red-50/80 text-brand-red dark:bg-red-500/10 dark:text-red-400',
 };
 
 const urgencyLabels: Record<string, string> = {
@@ -46,14 +46,14 @@ export default function Capas() {
   const filters: FilterStatus[] = ['all', 'open', 'in_progress', 'overdue', 'closed'];
 
   return (
-    <div>
+    <div className="bg-transparent">
       <PageHeader
         title="CAPAs"
         description="Corrective and preventive actions"
         actions={
           <button
             onClick={() => setShowCreate(true)}
-            className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
+            className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
           >
             New CAPA
           </button>
@@ -62,35 +62,35 @@ export default function Capas() {
       <div className="p-6 md:p-8">
         {/* Create form */}
         {showCreate && (
-          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">Create CAPA</h3>
-            <div className="space-y-3">
+          <div className="mb-6 rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">Create CAPA</h3>
+            <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Describe the corrective action required"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Description (optional)
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Urgency</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Urgency</label>
                 <select
                   value={urgency}
                   onChange={(e) => setUrgency(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-white/5 dark:text-white"
                 >
                   <option value="immediate">Immediate (4 hours)</option>
                   <option value="24hr">24 hours</option>
@@ -102,13 +102,13 @@ export default function Capas() {
                 <button
                   onClick={handleCreate}
                   disabled={!title.trim() || createCapa.isPending}
-                  className="rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+                  className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                 >
                   {createCapa.isPending ? 'Creating...' : 'Create'}
                 </button>
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                  className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50/50 transition-colors dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
                 >
                   Cancel
                 </button>
@@ -123,10 +123,10 @@ export default function Capas() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                 filter === f
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                  : 'bg-white/60 text-gray-600 hover:bg-white/80 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10'
               }`}
             >
               {f === 'all' ? 'All' : f.replace('_', ' ')}
@@ -136,14 +136,14 @@ export default function Capas() {
 
         {/* CAPA list */}
         {isLoading ? (
-          <p className="text-sm text-brand-gray">Loading CAPAs...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading CAPAs...</p>
         ) : isError ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
-            <p className="text-sm text-brand-gray">No CAPAs found.</p>
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-6 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No CAPAs found.</p>
           </div>
         ) : !capas?.length ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <p className="text-sm text-brand-gray">No CAPAs found.</p>
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-6 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No CAPAs found.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -158,11 +158,11 @@ export default function Capas() {
                 <Link
                   key={capa.id}
                   to={`/${orgSlug}/sites/${siteSlug}/capas/${capa.id}`}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 hover:bg-gray-50"
+                  className="flex items-center justify-between rounded-xl bg-white/70 backdrop-blur-xl px-4 py-3.5 shadow-sm border border-white/20 hover:bg-gray-50/50 transition-colors dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">{capa.title}</p>
-                    <div className="mt-0.5 flex items-center gap-2 text-xs text-brand-gray">
+                    <p className="truncate text-sm font-medium text-gray-900 dark:text-white">{capa.title}</p>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                       {capa.urgency && <span>{urgencyLabels[capa.urgency] ?? capa.urgency}</span>}
                       {capa.due_date && (
                         <span>Due {new Date(capa.due_date).toLocaleDateString('en-AU')}</span>
@@ -173,7 +173,7 @@ export default function Capas() {
                     </div>
                   </div>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[effectiveStatus] ?? ''}`}
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[effectiveStatus] ?? ''}`}
                   >
                     {effectiveStatus.replace('_', ' ')}
                   </span>

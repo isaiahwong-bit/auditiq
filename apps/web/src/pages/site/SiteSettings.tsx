@@ -45,7 +45,7 @@ export default function SiteSettings() {
   ];
 
   return (
-    <div>
+    <div className="bg-transparent">
       <PageHeader
         title="Site Settings"
         description={site?.name ?? 'Facility configuration and preferences'}
@@ -53,27 +53,27 @@ export default function SiteSettings() {
       <div className="p-6 md:p-8">
         {/* Site info */}
         <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-gray">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Site Details
           </h2>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
             <dl className="grid gap-4 sm:grid-cols-3">
               <div>
-                <dt className="text-xs font-medium text-brand-gray">Name</dt>
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">Name</dt>
                 <dd className="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
-                  {site?.name ?? '—'}
+                  {site?.name ?? '\u2014'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-brand-gray">Address</dt>
-                <dd className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
-                  {site?.address ?? '—'}
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">Address</dt>
+                <dd className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">
+                  {site?.address ?? '\u2014'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-brand-gray">Type</dt>
-                <dd className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
-                  {site?.site_type?.replace('_', ' ') ?? '—'}
+                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">Type</dt>
+                <dd className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">
+                  {site?.site_type?.replace('_', ' ') ?? '\u2014'}
                 </dd>
               </div>
             </dl>
@@ -82,24 +82,24 @@ export default function SiteSettings() {
 
         {/* Settings sections */}
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-gray">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Configuration
           </h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {settingsSections.map((section) => {
               const Card = (
                 <div
-                  className={`rounded-lg border p-4 transition-shadow ${
+                  className={`rounded-2xl p-5 transition-all border shadow-sm ${
                     section.highlight
-                      ? 'border-brand-green/30 bg-brand-green-light/10 hover:shadow-md dark:bg-brand-green/5 dark:border-brand-green/20'
-                      : 'border-gray-200 bg-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800'
-                  } ${section.link ? 'cursor-pointer' : 'opacity-75'}`}
+                      ? 'bg-white/70 backdrop-blur-xl border-emerald-200/50 dark:bg-white/5 dark:border-emerald-500/20'
+                      : 'bg-white/70 backdrop-blur-xl border-white/20 dark:bg-white/5 dark:border-white/10'
+                  } ${section.link ? 'cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/10' : 'opacity-75'}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 rounded-lg p-2 ${
+                    <div className={`mt-0.5 rounded-xl p-2.5 ${
                       section.highlight
-                        ? 'bg-brand-green-light text-brand-green dark:bg-brand-green/10'
-                        : 'bg-gray-100 text-brand-gray dark:bg-gray-700'
+                        ? 'bg-emerald-50/80 text-brand-green dark:bg-emerald-500/10'
+                        : 'bg-gray-100/80 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                     }`}>
                       <section.icon />
                     </div>
@@ -107,9 +107,9 @@ export default function SiteSettings() {
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                         {section.title}
                       </h3>
-                      <p className="mt-0.5 text-xs text-brand-gray">{section.description}</p>
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{section.description}</p>
                       {!section.link && (
-                        <span className="mt-1.5 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-brand-gray dark:bg-gray-700">
+                        <span className="mt-2 inline-block rounded-full bg-gray-100/80 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/10 dark:text-gray-400">
                           Coming soon
                         </span>
                       )}

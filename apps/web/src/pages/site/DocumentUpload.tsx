@@ -302,14 +302,14 @@ export default function DocumentUpload() {
             </h2>
             <button
               onClick={() => setShowUpload(!showUpload)}
-              className="rounded-lg bg-brand-green px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-green/90 transition-colors"
+              className="rounded-xl bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
             >
               {showUpload ? 'Cancel' : 'New Upload'}
             </button>
           </div>
 
           {showUpload && (
-            <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
               {/* Document type */}
               <div className="mb-4">
                 <label className="block text-xs font-medium text-brand-gray mb-1">
@@ -318,7 +318,7 @@ export default function DocumentUpload() {
                 <select
                   value={docType}
                   onChange={(e) => setDocType(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
                 >
                   {DOCUMENT_TYPES.map((dt) => (
                     <option key={dt.value} value={dt.value}>
@@ -333,16 +333,16 @@ export default function DocumentUpload() {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`mb-4 rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+                className={`mb-4 rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${
                   isDragging
-                    ? 'border-brand-green bg-brand-green-light/20 dark:bg-brand-green/5'
-                    : 'border-gray-300 hover:border-gray-400 dark:border-gray-600'
+                    ? 'border-gray-400 bg-gray-50/50 dark:border-gray-500 dark:bg-white/5'
+                    : 'border-gray-300/50 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500'
                 }`}
               >
                 <UploadIcon />
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                   Drag and drop a file here, or{' '}
-                  <label className="cursor-pointer font-medium text-brand-green hover:text-brand-green/80">
+                  <label className="cursor-pointer font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300">
                     browse
                     <input
                       type="file"
@@ -384,7 +384,7 @@ export default function DocumentUpload() {
                   onChange={(e) => setDocContent(e.target.value)}
                   placeholder="Paste your pre-op checklist, HACCP plan, or scope of works content here..."
                   rows={8}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-500 dark:focus:ring-gray-700"
                 />
               </div>
 
@@ -398,7 +398,7 @@ export default function DocumentUpload() {
                   value={docName}
                   onChange={(e) => setDocName(e.target.value)}
                   placeholder="e.g. Kelso Pre-op Checklist v2"
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                  className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-500 dark:focus:ring-gray-700"
                 />
               </div>
 
@@ -413,7 +413,7 @@ export default function DocumentUpload() {
               <button
                 onClick={handleUploadAndProcess}
                 disabled={(!docContent.trim() && !selectedFile) || isProcessing}
-                className="rounded-lg bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-brand-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
@@ -441,7 +441,7 @@ export default function DocumentUpload() {
           )}
 
           {!isLoading && (!documents || documents.length === 0) && (
-            <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-8 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
               <DocumentIcon />
               <p className="mt-2 text-sm text-brand-gray">
                 No documents uploaded yet. Upload a pre-op checklist, HACCP plan, or scope of works
@@ -455,10 +455,10 @@ export default function DocumentUpload() {
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className={`rounded-lg border p-4 transition-all cursor-pointer ${
+                  className={`rounded-2xl backdrop-blur-xl p-4 transition-all cursor-pointer shadow-sm border ${
                     selectedDocId === doc.id
-                      ? 'border-brand-green bg-brand-green-light/10 dark:border-brand-green/40 dark:bg-brand-green/5'
-                      : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+                      ? 'bg-white/80 border-gray-300 dark:bg-white/10 dark:border-white/20'
+                      : 'bg-white/70 border-white/20 hover:bg-gray-50/50 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10'
                   }`}
                   onClick={() => setSelectedDocId(doc.id === selectedDocId ? null : doc.id)}
                 >
@@ -511,7 +511,7 @@ export default function DocumentUpload() {
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-gray">
               AI Extraction Review
             </h2>
-            <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 mb-4 dark:border-amber-800/40 dark:bg-amber-900/10">
+            <div className="rounded-2xl border border-amber-200/50 bg-amber-50/50 backdrop-blur-xl p-4 mb-4 dark:border-amber-500/20 dark:bg-amber-500/10">
               <div className="flex items-start gap-2">
                 <InfoIcon />
                 <div>
@@ -536,12 +536,12 @@ export default function DocumentUpload() {
               {extracted.areas.map((area, areaIdx) => (
                 <div
                   key={areaIdx}
-                  className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                  className="rounded-2xl bg-white/70 backdrop-blur-xl shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10"
                 >
                   {/* Area header */}
                   <button
                     onClick={() => toggleArea(areaIdx)}
-                    className="flex w-full items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg"
+                    className="flex w-full items-center justify-between p-4 text-left hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors rounded-xl"
                   >
                     <div className="flex items-center gap-3">
                       <ChevronIcon expanded={expandedAreas.has(areaIdx)} />
@@ -631,7 +631,7 @@ export default function DocumentUpload() {
                   {extracted.coverage_gaps.map((gap, gapIdx) => (
                     <div
                       key={gapIdx}
-                      className="rounded-lg border border-red-200 bg-red-50/50 p-3 dark:border-red-800/40 dark:bg-red-900/10"
+                      className="rounded-xl border border-red-200/50 bg-red-50/50 p-3 dark:border-red-500/20 dark:bg-red-500/10"
                     >
                       <div className="flex items-center gap-2">
                         <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300 uppercase">
@@ -662,7 +662,7 @@ export default function DocumentUpload() {
               <button
                 onClick={() => handleApprove(selectedDoc.id)}
                 disabled={isApproving}
-                className="rounded-lg bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-brand-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
               >
                 {isApproving ? (
                   <span className="flex items-center gap-2">
@@ -675,7 +675,7 @@ export default function DocumentUpload() {
               <button
                 onClick={() => handleReprocess(selectedDoc.id)}
                 disabled={processDocument.isPending}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-xl border border-gray-200 bg-white/50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 Re-process
               </button>
@@ -686,7 +686,7 @@ export default function DocumentUpload() {
         {/* Approved document info */}
         {selectedDoc && selectedDoc.processing_status === 'approved' && (
           <section>
-            <div className="rounded-lg border border-green-200 bg-green-50/50 p-4 dark:border-green-800/40 dark:bg-green-900/10">
+            <div className="rounded-2xl border border-emerald-200/50 bg-emerald-50/50 backdrop-blur-xl p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
               <div className="flex items-start gap-2">
                 <CheckCircleIcon />
                 <div>
@@ -713,7 +713,7 @@ export default function DocumentUpload() {
         {/* Processing state */}
         {selectedDoc && selectedDoc.processing_status === 'processing' && (
           <section>
-            <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-800/40 dark:bg-blue-900/10">
+            <div className="rounded-2xl border border-blue-200/50 bg-blue-50/50 backdrop-blur-xl p-4 dark:border-blue-500/20 dark:bg-blue-500/10">
               <div className="flex items-center gap-2">
                 <Spinner />
                 <p className="text-sm text-blue-700 dark:text-blue-300">
@@ -727,7 +727,7 @@ export default function DocumentUpload() {
         {/* Pending state */}
         {selectedDoc && selectedDoc.processing_status === 'pending' && (
           <section>
-            <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-4 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
               <p className="text-sm text-brand-gray">
                 This document has not been processed yet. Paste the document content and click
                 process to extract facility areas with AI.

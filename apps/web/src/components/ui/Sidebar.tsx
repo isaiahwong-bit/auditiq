@@ -30,39 +30,49 @@ export function Sidebar() {
   const navItems = isSiteView ? siteNavItems : orgNavItems;
   const basePath = isSiteView ? `/${orgSlug}/sites/${siteSlug}` : `/${orgSlug}`;
 
+  const initials = profile?.full_name
+    ? profile.full_name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'U';
+
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800">
+    <aside className="m-3 flex h-[calc(100vh-1.5rem)] w-64 shrink-0 flex-col rounded-2xl border border-white/40 bg-white/70 shadow-lg shadow-black/5 backdrop-blur-xl dark:border-gray-700/40 dark:bg-gray-900/70 dark:shadow-black/20">
       {/* Logo + Org */}
-      <div className="border-b border-gray-200 px-4 py-4 dark:border-gray-800">
-        <NavLink to={`/${orgSlug}/dashboard`} className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-green text-sm font-bold text-white">
+      <div className="px-5 pb-4 pt-6">
+        <NavLink to={`/${orgSlug}/dashboard`} className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 text-sm font-bold text-white dark:bg-white dark:text-gray-900">
             A
           </div>
-          <span className="text-lg font-bold text-gray-900 dark:text-white">AuditArmour</span>
+          <span className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">AuditArmour</span>
         </NavLink>
         {org && (
-          <p className="mt-1 truncate text-xs text-brand-gray">{org.name}</p>
+          <p className="mt-2 truncate pl-12 text-xs font-medium text-gray-400 dark:text-gray-500">{org.name}</p>
         )}
       </div>
 
       {/* Site switcher */}
-      <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-800">
-        <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-brand-gray">Site</p>
+      <div className="px-5 pb-4">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Site</p>
         <SiteSwitcher />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
-        <ul className="space-y-0.5">
+      <nav className="flex-1 overflow-y-auto px-3 py-2">
+        <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Navigation</p>
+        <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.path}>
               <NavLink
                 to={`${basePath}/${item.path}`}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-brand-green-light text-brand-green'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
+                      ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-white'
                   }`
                 }
               >
@@ -75,25 +85,28 @@ export function Sidebar() {
       </nav>
 
       {/* User section */}
-      <div className="border-t border-gray-200 px-4 py-3 dark:border-gray-800">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+      <div className="border-t border-gray-200/60 px-4 py-4 dark:border-gray-700/40">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green text-xs font-bold text-white">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
               {profile?.full_name || 'User'}
             </p>
-            <p className="truncate text-xs text-brand-gray">{profile?.role?.replace('_', ' ')}</p>
+            <p className="truncate text-xs capitalize text-gray-400 dark:text-gray-500">{profile?.role?.replace('_', ' ')}</p>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               onClick={toggleTheme}
-              className="shrink-0 rounded-md p-1.5 text-brand-gray hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800/60 dark:hover:text-white"
               title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               {theme === 'light' ? <MoonIcon /> : <SunIcon />}
             </button>
             <button
               onClick={signOut}
-              className="shrink-0 rounded-md p-1.5 text-brand-gray hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800/60 dark:hover:text-white"
               title="Sign out"
             >
               <LogoutIcon />

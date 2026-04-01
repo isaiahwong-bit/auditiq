@@ -29,11 +29,11 @@ export default function Reports() {
   };
 
   return (
-    <div>
+    <div className="bg-transparent">
       <PageHeader title="Reports" description="Generate audit reports and certification evidence packages" />
       <div className="p-6 md:p-8">
         {message && (
-          <div className="mb-6 rounded-md bg-brand-blue-light px-4 py-3 text-sm text-brand-blue">
+          <div className="mb-6 rounded-2xl bg-blue-50/50 backdrop-blur-xl px-5 py-3.5 text-sm text-brand-blue border border-blue-200/50 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400">
             {message}
             <button
               onClick={() => setMessage(null)}
@@ -46,21 +46,21 @@ export default function Reports() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Audit Reports */}
-          <section className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-gray">
+          <section className="rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
               Audit Reports
             </h2>
             {completedAudits.length === 0 ? (
-              <p className="text-sm text-brand-gray">No completed audits to report on.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">No completed audits to report on.</p>
             ) : (
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-gray-100/50 dark:divide-white/5">
                 {completedAudits.map((audit) => (
                   <li key={audit.id} className="flex items-center justify-between py-3">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {audit.audit_type?.replace('_', ' ')} audit
                       </p>
-                      <p className="text-xs text-brand-gray">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {audit.completed_at
                           ? new Date(audit.completed_at).toLocaleDateString('en-AU')
                           : 'N/A'}
@@ -70,7 +70,7 @@ export default function Reports() {
                     <button
                       onClick={() => handleAuditReport(audit.id)}
                       disabled={generateReport.isPending}
-                      className="rounded-md border border-brand-blue px-3 py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-blue-light disabled:opacity-50"
+                      className="rounded-xl border border-gray-200 bg-white/50 px-3.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50/50 disabled:opacity-50 transition-colors dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
                     >
                       Generate
                     </button>
@@ -81,48 +81,48 @@ export default function Reports() {
           </section>
 
           {/* Certification Evidence Package */}
-          <section className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-gray">
+          <section className="rounded-2xl bg-white/70 backdrop-blur-xl p-5 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
               Certification Evidence Package
             </h2>
-            <p className="mb-4 text-sm text-brand-gray">
-              Comprehensive evidence package for auditor visits — includes compliance status,
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              Comprehensive evidence package for auditor visits -- includes compliance status,
               rectification plans, pre-op completion rates, and CAPA summary.
             </p>
 
             {certPreview && (
-              <div className="mb-4 space-y-2 rounded-md bg-gray-50 p-3 text-xs">
+              <div className="mb-4 space-y-2 rounded-xl bg-gray-50/50 p-3.5 text-xs dark:bg-white/5">
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Active frameworks</span>
-                  <span className="font-medium">{certPreview.frameworks.length}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Active frameworks</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{certPreview.frameworks.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Clauses covered</span>
+                  <span className="text-gray-500 dark:text-gray-400">Clauses covered</span>
                   <span className="font-medium text-brand-green">
                     {certPreview.gap_summary.covered} / {certPreview.gap_summary.total_clauses}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Rectification plans</span>
+                  <span className="text-gray-500 dark:text-gray-400">Rectification plans</span>
                   <span className="font-medium text-brand-amber">
                     {certPreview.gap_summary.plans_in_place}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Unaddressed gaps</span>
+                  <span className="text-gray-500 dark:text-gray-400">Unaddressed gaps</span>
                   <span className="font-medium text-brand-red">
                     {certPreview.gap_summary.gaps}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Pre-op pass rate (30d)</span>
-                  <span className="font-medium">
-                    {certPreview.preop_completion.avg_pass_rate?.toFixed(1) ?? '—'}%
+                  <span className="text-gray-500 dark:text-gray-400">Pre-op pass rate (30d)</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {certPreview.preop_completion.avg_pass_rate?.toFixed(1) ?? '\u2014'}%
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-brand-gray">Open CAPAs</span>
-                  <span className="font-medium">{certPreview.open_capas}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Open CAPAs</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{certPreview.open_capas}</span>
                 </div>
               </div>
             )}
@@ -130,7 +130,7 @@ export default function Reports() {
             <button
               onClick={handleCertPack}
               disabled={generateCertPack.isPending}
-              className="w-full rounded-md bg-brand-green px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-50"
+              className="w-full rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
             >
               {generateCertPack.isPending ? 'Generating...' : 'Generate Certification Package'}
             </button>

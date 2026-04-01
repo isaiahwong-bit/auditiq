@@ -8,8 +8,8 @@ export function MobileNav() {
   const basePath = `/${orgSlug}/sites/${siteSlug}`;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden">
-      <div className="flex">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/30 bg-white/80 backdrop-blur-xl md:hidden dark:border-gray-700/40 dark:bg-gray-900/80">
+      <div className="mx-auto flex max-w-lg">
         <MobileTab to={`${basePath}/pre-op-checks`} label="Checks">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -35,13 +35,21 @@ function MobileTab({ to, label, children }: { to: string; label: string; childre
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium ${
-          isActive ? 'text-brand-green' : 'text-brand-gray'
+        `flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition-all duration-200 ${
+          isActive
+            ? 'text-gray-900 dark:text-white'
+            : 'text-gray-400 dark:text-gray-500'
         }`
       }
     >
-      {children}
-      <span>{label}</span>
+      {({ isActive }) => (
+        <>
+          <span className={`rounded-xl px-4 py-1 transition-all duration-200 ${isActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}>
+            {children}
+          </span>
+          <span>{label}</span>
+        </>
+      )}
     </NavLink>
   );
 }

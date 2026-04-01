@@ -99,13 +99,13 @@ export default function Compliance() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="bg-transparent">
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="border-b border-gray-200 bg-white px-6 py-5 dark:border-gray-700 dark:bg-gray-800 md:px-8">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <div className="bg-white/70 backdrop-blur-xl px-6 py-5 md:px-8 dark:bg-white/5 dark:backdrop-blur-xl">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           Compliance frameworks
         </h1>
-        <p className="mt-1 text-sm text-brand-gray dark:text-gray-400">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Kelso NSW &mdash; Toggle active standards. Gaps surface by area below
         </p>
       </div>
@@ -123,13 +123,13 @@ export default function Compliance() {
               ))}
             </div>
           ) : fwError ? (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-800">
-              <p className="text-sm text-brand-gray">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl p-6 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Connect the API backend to manage framework compliance.
               </p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <div className="overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xl shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
               {(allFrameworks ?? []).map((fw, idx) => {
                 const isEnabled = enabledIds.has(fw.id);
                 const isLast = idx === (allFrameworks ?? []).length - 1;
@@ -139,8 +139,8 @@ export default function Compliance() {
                     key={fw.id}
                     className={`
                       relative flex items-center justify-between px-4 py-3.5 transition-colors
-                      ${!isLast ? 'border-b border-gray-100 dark:border-gray-700' : ''}
-                      ${isEnabled ? 'bg-brand-green-light/30 dark:bg-brand-green/10' : ''}
+                      ${!isLast ? 'border-b border-gray-100/50 dark:border-white/5' : ''}
+                      ${isEnabled ? 'bg-emerald-50/30 dark:bg-emerald-500/5' : ''}
                     `}
                   >
                     {/* Active left border indicator */}
@@ -162,7 +162,7 @@ export default function Compliance() {
                         <p className="text-xs text-brand-gray dark:text-gray-400">
                           {fw.version}
                           {fw.type && (
-                            <span className="ml-1.5 inline-block rounded-full bg-gray-100 px-1.5 py-px text-[10px] font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                            <span className="ml-1.5 inline-block rounded-full bg-gray-100/80 px-1.5 py-px text-[10px] font-medium text-gray-500 dark:bg-white/10 dark:text-gray-400">
                               {fw.type}
                             </span>
                           )}
@@ -203,9 +203,8 @@ export default function Compliance() {
         {noticeVisible && activationNotice && (
           <div
             className={`
-              mb-6 overflow-hidden rounded-lg border border-brand-blue/30 bg-gradient-to-r
-              from-brand-blue/15 to-brand-blue-light
-              dark:border-brand-blue/40 dark:from-brand-blue/20 dark:to-brand-blue/10
+              mb-6 overflow-hidden rounded-2xl border border-blue-200/50 bg-blue-50/50 backdrop-blur-xl
+              dark:border-blue-500/20 dark:bg-blue-500/10
               animate-in fade-in slide-in-from-top-2
             `}
             style={{
@@ -292,7 +291,7 @@ export default function Compliance() {
 
         {/* ── Area section ─────────────────────────────────────────────── */}
         <section>
-          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-gray dark:text-gray-400">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Gaps by facility area &mdash; tap an area to review
           </h2>
           {gapLoading ? (
@@ -305,7 +304,7 @@ export default function Compliance() {
               ))}
             </div>
           ) : !gapData?.areas.length ? (
-            <div className="rounded-lg border border-gray-200 bg-white px-6 py-10 text-center dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl px-6 py-10 text-center shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10">
               <svg
                 className="mx-auto mb-3 h-10 w-10 text-gray-300 dark:text-gray-600"
                 fill="none"
@@ -367,10 +366,10 @@ function SummaryCard({
   color: 'green' | 'amber' | 'red' | 'blue';
 }) {
   const bgStyles: Record<string, string> = {
-    green: 'border-brand-green/20 bg-brand-green-light dark:bg-brand-green/10 dark:border-brand-green/20',
-    amber: 'border-brand-amber/20 bg-brand-amber-light dark:bg-brand-amber/10 dark:border-brand-amber/20',
-    red: 'border-brand-red/20 bg-brand-red-light dark:bg-brand-red/10 dark:border-brand-red/20',
-    blue: 'border-brand-blue/20 bg-brand-blue-light dark:bg-brand-blue/10 dark:border-brand-blue/20',
+    green: 'border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-500/10 dark:border-emerald-500/20',
+    amber: 'border-amber-200/50 bg-amber-50/50 dark:bg-amber-500/10 dark:border-amber-500/20',
+    red: 'border-red-200/50 bg-red-50/50 dark:bg-red-500/10 dark:border-red-500/20',
+    blue: 'border-blue-200/50 bg-blue-50/50 dark:bg-blue-500/10 dark:border-blue-500/20',
   };
   const textStyles: Record<string, string> = {
     green: 'text-brand-green',
@@ -380,9 +379,9 @@ function SummaryCard({
   };
 
   return (
-    <div className={`rounded-lg border p-3 ${bgStyles[color]}`}>
+    <div className={`rounded-2xl backdrop-blur-xl border p-3 ${bgStyles[color]}`}>
       <p className={`text-2xl font-bold tabular-nums ${textStyles[color]}`}>{value}</p>
-      <p className="text-xs text-brand-gray dark:text-gray-400">{label}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
     </div>
   );
 }
@@ -407,11 +406,11 @@ function AreaAccordion({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="overflow-hidden rounded-2xl bg-white/70 backdrop-blur-xl shadow-sm border border-white/20 transition-shadow hover:shadow-md dark:bg-white/5 dark:border-white/10">
       {/* Accordion header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 dark:hover:bg-gray-700/50"
+        className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-gray-50/50 dark:hover:bg-white/5 rounded-xl"
         aria-expanded={expanded}
       >
         <div className="flex items-center gap-3">
@@ -454,9 +453,9 @@ function AreaAccordion({
 
       {/* Expanded clause list */}
       {expanded && (
-        <div className="border-t border-gray-100 dark:border-gray-700">
+        <div className="border-t border-gray-100/50 dark:border-white/5">
           {area.clauses.length === 0 ? (
-            <p className="px-4 py-4 text-sm text-brand-gray dark:text-gray-400">
+            <p className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
               No clauses mapped to this area.
             </p>
           ) : (
@@ -759,7 +758,7 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
                   </button>
                 </div>
               ) : showPlanForm ? (
-                <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                <div className="space-y-3 rounded-xl border border-gray-200/50 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-white/5">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                       Describe the rectification plan
@@ -814,7 +813,7 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                <div className="space-y-3 rounded-xl border border-gray-200/50 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-white/5">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                       Where is this document or record kept?

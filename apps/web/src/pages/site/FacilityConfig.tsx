@@ -117,7 +117,7 @@ export default function FacilityConfig() {
           </h2>
           <button
             onClick={() => setShowAddArea(true)}
-            className="rounded-lg bg-brand-green px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-green/90 transition-colors"
+            className="rounded-xl bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
           >
             + Add area
           </button>
@@ -140,11 +140,11 @@ export default function FacilityConfig() {
 
         {/* Empty state */}
         {!isLoading && areas && areas.length === 0 && !showAddArea && (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center dark:border-gray-600 dark:bg-gray-800">
-            <p className="text-sm text-brand-gray">No facility areas configured yet.</p>
+          <div className="rounded-2xl border border-dashed border-gray-300/50 bg-white/70 backdrop-blur-xl p-8 text-center dark:border-white/10 dark:bg-white/5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No facility areas configured yet.</p>
             <button
               onClick={() => setShowAddArea(true)}
-              className="mt-3 text-sm font-medium text-brand-green hover:text-brand-green/80"
+              className="mt-3 text-sm font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
             >
               Add your first area
             </button>
@@ -204,7 +204,7 @@ function AddAreaForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-4 rounded-lg border border-brand-green/30 bg-brand-green-light/10 p-4 dark:border-brand-green/20 dark:bg-brand-green/5"
+      className="mb-4 rounded-2xl bg-white/70 backdrop-blur-xl p-4 shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
@@ -216,7 +216,7 @@ function AddAreaForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Kill Floor, Boning Room"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-500 dark:focus:ring-gray-700"
             autoFocus
           />
         </div>
@@ -227,7 +227,7 @@ function AddAreaForm({
           <select
             value={areaType}
             onChange={(e) => setAreaType(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             <option value="">Select type</option>
             {AREA_TYPES.map((t) => (
@@ -244,7 +244,7 @@ function AddAreaForm({
           <select
             value={careLevel}
             onChange={(e) => setCareLevel(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             {CARE_LEVELS.map((cl) => (
               <option key={cl.value} value={cl.value}>
@@ -257,14 +257,14 @@ function AddAreaForm({
           <button
             type="submit"
             disabled={createArea.isPending || !name.trim()}
-            className="rounded-md bg-brand-green px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-green/90 disabled:opacity-50 transition-colors"
+            className="rounded-xl bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
           >
             {createArea.isPending ? 'Adding...' : 'Add'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            className="rounded-xl border border-gray-200 bg-white/50 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50/50 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
           >
             Cancel
           </button>
@@ -340,7 +340,7 @@ function AreaList({
       {areas.map((area, index) => (
         <div
           key={area.id}
-          className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+          className="rounded-2xl bg-white/70 backdrop-blur-xl shadow-sm border border-white/20 dark:bg-white/5 dark:border-white/10"
         >
           {/* Area header */}
           <div className="flex items-center gap-2 px-4 py-3">
@@ -465,7 +465,7 @@ function AreaList({
 
           {/* Expanded: check items */}
           {expandedAreaId === area.id && editingAreaId !== area.id && (
-            <div className="border-t border-gray-200 dark:border-gray-700">
+            <div className="border-t border-gray-100/50 dark:border-white/5">
               <CheckItemSection areaId={area.id} />
             </div>
           )}
@@ -511,7 +511,7 @@ function EditAreaForm({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
             autoFocus
           />
         </div>
@@ -519,7 +519,7 @@ function EditAreaForm({
           <select
             value={areaType}
             onChange={(e) => setAreaType(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             <option value="">No type</option>
             {AREA_TYPES.map((t) => (
@@ -533,7 +533,7 @@ function EditAreaForm({
           <select
             value={careLevel}
             onChange={(e) => setCareLevel(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             {CARE_LEVELS.map((cl) => (
               <option key={cl.value} value={cl.value}>
@@ -546,14 +546,14 @@ function EditAreaForm({
           <button
             type="submit"
             disabled={updateArea.isPending || !name.trim()}
-            className="rounded-md bg-brand-green px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-green/90 disabled:opacity-50 transition-colors"
+            className="rounded-xl bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
           >
             {updateArea.isPending ? 'Saving...' : 'Save'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            className="rounded-xl border border-gray-200 bg-white/50 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50/50 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
           >
             Cancel
           </button>
@@ -583,7 +583,7 @@ function CheckItemSection({ areaId }: { areaId: string }) {
         </h3>
         <button
           onClick={() => setShowAddItem(true)}
-          className="text-xs font-medium text-brand-green hover:text-brand-green/80"
+          className="text-xs font-medium text-gray-900 hover:text-gray-700 dark:text-white dark:hover:text-gray-300"
         >
           + Add item
         </button>
@@ -669,7 +669,7 @@ function CheckItemRow({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800/50">
+    <div className="flex items-center gap-3 rounded-xl border border-gray-100/50 bg-gray-50/50 px-3 py-2.5 dark:border-white/5 dark:bg-white/5">
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</p>
         {item.description && (
@@ -810,7 +810,7 @@ function CheckItemForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-2 rounded-lg border border-brand-blue/20 bg-brand-blue-light/10 p-3 dark:border-blue-500/20 dark:bg-blue-900/10"
+      className="mb-2 rounded-xl bg-white/50 backdrop-blur-xl p-3 border border-gray-200/50 dark:bg-white/5 dark:border-white/10"
     >
       <div className="grid gap-3 sm:grid-cols-2">
         {/* Name */}
@@ -823,7 +823,7 @@ function CheckItemForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Floor drains clear, Metal detector operational"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-500 dark:focus:ring-gray-700"
             autoFocus
           />
         </div>
@@ -838,7 +838,7 @@ function CheckItemForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional details for the operator"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-500 dark:focus:ring-gray-700"
           />
         </div>
 
@@ -850,7 +850,7 @@ function CheckItemForm({
           <select
             value={scoringType}
             onChange={(e) => setScoringType(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             {SCORING_TYPES.map((st) => (
               <option key={st.value} value={st.value}>
@@ -868,7 +868,7 @@ function CheckItemForm({
           <select
             value={frequency}
             onChange={(e) => setFrequency(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             {FREQUENCIES.map((f) => (
               <option key={f.value} value={f.value}>
@@ -886,7 +886,7 @@ function CheckItemForm({
           <select
             value={categoryCode}
             onChange={(e) => setCategoryCode(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-white/5 dark:text-white dark:focus:border-gray-500 dark:focus:ring-gray-700"
           >
             <option value="">None</option>
             {(categories ?? []).map((c) => (
@@ -906,14 +906,14 @@ function CheckItemForm({
         <button
           type="submit"
           disabled={isPending || !name.trim()}
-          className="rounded-md bg-brand-blue px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-blue/90 disabled:opacity-50 transition-colors"
+          className="rounded-xl bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
         >
           {isPending ? 'Saving...' : isEditing ? 'Update' : 'Add item'}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          className="rounded-xl border border-gray-200 bg-white/50 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50/50 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
         >
           Cancel
         </button>

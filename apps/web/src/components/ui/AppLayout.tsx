@@ -6,7 +6,7 @@ import { ThemeProvider } from './ThemeProvider';
 export function AppLayout() {
   return (
     <ThemeProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
         {/* Desktop sidebar — hidden below 768px */}
         <div className="hidden md:block">
           <Sidebar />

@@ -29,11 +29,11 @@ export function SiteSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        className="flex w-full items-center justify-between rounded-xl border border-gray-200/60 bg-white/60 px-3 py-2.5 text-sm font-medium text-gray-900 backdrop-blur-sm transition-all duration-200 hover:bg-white/80 dark:border-gray-700/40 dark:bg-gray-800/60 dark:text-white dark:hover:bg-gray-800/80"
       >
         <span className="truncate">{currentSite?.name ?? 'Select site'}</span>
         <svg
-          className={`ml-2 h-4 w-4 shrink-0 text-brand-gray transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -41,7 +41,7 @@ export function SiteSwitcher() {
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 z-50 mt-1 rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <div className="absolute left-0 right-0 z-50 mt-1.5 overflow-hidden rounded-xl border border-white/40 bg-white/90 py-1 shadow-lg shadow-black/5 backdrop-blur-lg dark:border-gray-700/40 dark:bg-gray-800/90 dark:shadow-black/20">
           {sites.map((site) => (
             <button
               key={site.id}
@@ -49,9 +49,9 @@ export function SiteSwitcher() {
                 navigate(`/${orgSlug}/sites/${site.slug}/dashboard`);
                 setOpen(false);
               }}
-              className={`block w-full px-3 py-2 text-left text-sm hover:bg-brand-green-light dark:hover:bg-brand-green/10 ${
+              className={`block w-full px-3 py-2 text-left text-sm transition-colors duration-150 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 ${
                 site.slug === siteSlug
-                  ? 'bg-brand-green-light font-medium text-brand-green dark:bg-brand-green/10'
+                  ? 'bg-gray-900 font-medium text-white dark:bg-white dark:text-gray-900'
                   : 'text-gray-700 dark:text-gray-300'
               }`}
             >
