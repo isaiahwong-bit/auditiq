@@ -29,6 +29,7 @@ export function useCreateArea() {
     mutationFn: (params: {
       name: string;
       area_type?: string | null;
+      care_level?: 'high' | 'medium' | 'low';
       display_order?: number;
     }) =>
       apiFetch<{ data: FacilityArea }>(base, {
@@ -49,6 +50,7 @@ export function useUpdateArea() {
       areaId: string;
       name?: string;
       area_type?: string | null;
+      care_level?: 'high' | 'medium' | 'low';
       display_order?: number;
     }) => {
       const { areaId, ...body } = params;

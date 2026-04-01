@@ -1,12 +1,15 @@
 import { supabaseAdmin } from '../lib/supabase';
 
-export async function getFacilityAreas(siteId: string) {
-  const { data, error } = await supabaseAdmin
+export async function getFacilityAreas(siteId: string, careLevel?: string) {
+  let query = supabaseAdmin
     .from('facility_areas')
     .select('*')
     .eq('site_id', siteId)
-    .eq('is_active', true)
-    .order('display_order');
+    .eq('is_active', true);
+  if (careLevel) {
+    query = query.eq('care_level', careLevel);
+  }
+  const { data, error } = await query.order('display_order');
   if (error) throw error;
   return data;
 }

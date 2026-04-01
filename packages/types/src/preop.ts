@@ -1,4 +1,5 @@
 export type AreaType = 'production' | 'storage' | 'amenities' | 'dispatch' | 'external' | 'equipment';
+export type CareLevel = 'high' | 'medium' | 'low';
 export type ScoringType = 'pass_fail' | 'numeric' | 'percentage';
 export type Frequency = 'daily' | 'per_shift' | 'weekly' | 'monthly';
 export type SessionStatus = 'in_progress' | 'complete' | 'missed';
@@ -10,6 +11,7 @@ export interface FacilityArea {
   organisation_id: string;
   name: string;
   area_type: AreaType | null;
+  care_level: CareLevel;
   display_order: number;
   is_active: boolean;
   source_document_id: string | null;

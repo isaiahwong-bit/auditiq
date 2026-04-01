@@ -19,6 +19,7 @@ const extractedAreaSchema = z.object({
     .enum(['production', 'storage', 'amenities', 'dispatch', 'external', 'equipment'])
     .nullable()
     .optional(),
+  care_level: z.enum(['high', 'medium', 'low']).optional().default('medium'),
   display_order: z.number().int().min(0).optional().default(0),
   check_items: z.array(extractedCheckItemSchema).optional().default([]),
 });
@@ -141,6 +142,7 @@ CRITICAL RULES:
    - Look for section headers, bold text, dividing lines, or labelled sections in tables.
    - Do NOT create a separate area for each individual check item.
    - Each area should contain MULTIPLE check items (typically 5-25 items per area).
+   - Assign a care_level to each area: "high" for RTE/cooked product zones, "medium" for raw processing areas, "low" for storage/dispatch/external areas.
 
 3. COVERAGE GAPS (separate section):
    - Items that SHOULD exist based on food safety standards but are NOT in the document go in "coverage_gaps" ONLY.
@@ -157,6 +159,7 @@ Respond with JSON only, no prose.`;
     {
       "name": "Area name",
       "area_type": "production|storage|amenities|dispatch|external|equipment",
+      "care_level": "high|medium|low",
       "display_order": 0,
       "check_items": [
         {
@@ -358,6 +361,7 @@ export async function approveDocument(
         organisation_id: orgId,
         name: area.name,
         area_type: area.area_type ?? null,
+        care_level: area.care_level ?? 'medium',
         display_order: area.display_order,
         source_document_id: documentId,
       })

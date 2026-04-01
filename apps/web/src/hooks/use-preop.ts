@@ -8,11 +8,12 @@ function usePreopBase() {
   return `/api/v1/org/${orgSlug}/sites/${siteSlug}/preop`;
 }
 
-export function useFacilityAreas() {
+export function useFacilityAreas(careLevel?: string) {
   const base = usePreopBase();
+  const url = careLevel ? `${base}/areas?care_level=${careLevel}` : `${base}/areas`;
   return useQuery({
-    queryKey: ['preop', 'areas', base],
-    queryFn: () => apiFetch<{ data: FacilityArea[] }>(`${base}/areas`).then((r) => r.data),
+    queryKey: ['preop', 'areas', base, careLevel],
+    queryFn: () => apiFetch<{ data: FacilityArea[] }>(url).then((r) => r.data),
   });
 }
 

@@ -23,6 +23,7 @@ const createAreaSchema = z.object({
     .enum(['production', 'storage', 'amenities', 'dispatch', 'external', 'equipment'])
     .nullable()
     .optional(),
+  care_level: z.enum(['high', 'medium', 'low']).optional(),
   display_order: z.number().int().min(0).optional(),
 });
 
@@ -34,6 +35,7 @@ facilityRoutes.post('/', async (req, res, next) => {
       organisationId: req.org!.id,
       name: body.name,
       areaType: body.area_type ?? null,
+      careLevel: body.care_level,
       displayOrder: body.display_order ?? 0,
     });
     res.status(201).json({ data: area });
@@ -79,6 +81,7 @@ const updateAreaSchema = z.object({
     .enum(['production', 'storage', 'amenities', 'dispatch', 'external', 'equipment'])
     .nullable()
     .optional(),
+  care_level: z.enum(['high', 'medium', 'low']).optional(),
   display_order: z.number().int().min(0).optional(),
 });
 
@@ -88,6 +91,7 @@ facilityRoutes.patch('/:areaId', async (req, res, next) => {
     const area = await facilityService.updateArea(req.params.areaId, req.site!.id, {
       name: body.name,
       areaType: body.area_type,
+      careLevel: body.care_level,
       displayOrder: body.display_order,
     });
     res.json({ data: area });

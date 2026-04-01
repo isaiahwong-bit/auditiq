@@ -7,7 +7,8 @@ export const preopRoutes = Router();
 // GET /preop/areas — list facility areas for the site
 preopRoutes.get('/areas', async (req, res, next) => {
   try {
-    const areas = await preopService.getFacilityAreas(req.site!.id);
+    const careLevel = req.query.care_level as string | undefined;
+    const areas = await preopService.getFacilityAreas(req.site!.id, careLevel);
     res.json({ data: areas });
   } catch (err) {
     next(err);

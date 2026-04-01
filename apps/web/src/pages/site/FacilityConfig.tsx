@@ -29,6 +29,12 @@ const SCORING_TYPES = [
   { value: 'percentage', label: 'Percentage' },
 ] as const;
 
+const CARE_LEVELS = [
+  { value: 'high', label: 'High Care' },
+  { value: 'medium', label: 'Medium Care' },
+  { value: 'low', label: 'Low Care' },
+] as const;
+
 const FREQUENCIES = [
   { value: 'daily', label: 'Daily' },
   { value: 'per_shift', label: 'Per Shift' },
@@ -50,6 +56,19 @@ function areaTypeBadgeColor(type: string | null): string {
       return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
     case 'equipment':
       return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
+    default:
+      return 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400';
+  }
+}
+
+function careLevelBadgeColor(level: string): string {
+  switch (level) {
+    case 'high':
+      return 'bg-brand-red-light text-brand-red dark:bg-brand-red/10 dark:text-red-300';
+    case 'medium':
+      return 'bg-brand-amber-light text-brand-amber dark:bg-brand-amber/10 dark:text-amber-300';
+    case 'low':
+      return 'bg-brand-green-light text-brand-green dark:bg-brand-green/10 dark:text-green-300';
     default:
       return 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400';
   }
@@ -159,6 +178,7 @@ function AddAreaForm({
   const createArea = useCreateArea();
   const [name, setName] = useState('');
   const [areaType, setAreaType] = useState<string>('');
+  const [careLevel, setCareLevel] = useState<string>('medium');
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -167,12 +187,14 @@ function AddAreaForm({
       {
         name: name.trim(),
         area_type: areaType || null,
+        care_level: careLevel as 'high' | 'medium' | 'low',
         display_order: existingCount,
       },
       {
         onSuccess: () => {
           setName('');
           setAreaType('');
+          setCareLevel('medium');
           onClose();
         },
       },
@@ -215,6 +237,22 @@ function AddAreaForm({
             ))}
           </select>
         </div>
+        <div className="w-full sm:w-40">
+          <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+            Care level
+          </label>
+          <select
+            value={careLevel}
+            onChange={(e) => setCareLevel(e.target.value)}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
+            {CARE_LEVELS.map((cl) => (
+              <option key={cl.value} value={cl.value}>
+                {cl.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex gap-2">
           <button
             type="submit"
@@ -247,6 +285,7 @@ interface AreaWithCount {
   id: string;
   name: string;
   area_type: string | null;
+  care_level: string;
   display_order: number;
   check_item_count: number;
   site_id: string;
@@ -349,14 +388,25 @@ function AreaList({
                   </>
                 )}
               </div>
-              {area.area_type && editingAreaId !== area.id && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${areaTypeBadgeColor(
-                    area.area_type,
-                  )}`}
-                >
-                  {area.area_type.replace('_', ' ')}
-                </span>
+              {editingAreaId !== area.id && (
+                <div className="flex items-center gap-1.5">
+                  {area.area_type && (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${areaTypeBadgeColor(
+                        area.area_type,
+                      )}`}
+                    >
+                      {area.area_type.replace('_', ' ')}
+                    </span>
+                  )}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${careLevelBadgeColor(
+                      area.care_level,
+                    )}`}
+                  >
+                    {area.care_level} care
+                  </span>
+                </div>
               )}
             </button>
 
@@ -437,6 +487,7 @@ function EditAreaForm({
   const updateArea = useUpdateArea();
   const [name, setName] = useState(area.name);
   const [areaType, setAreaType] = useState(area.area_type ?? '');
+  const [careLevel, setCareLevel] = useState(area.care_level ?? 'medium');
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -446,6 +497,7 @@ function EditAreaForm({
         areaId: area.id,
         name: name.trim(),
         area_type: areaType || null,
+        care_level: careLevel as 'high' | 'medium' | 'low',
       },
       { onSuccess: onClose },
     );
@@ -473,6 +525,19 @@ function EditAreaForm({
             {AREA_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="w-full sm:w-40">
+          <select
+            value={careLevel}
+            onChange={(e) => setCareLevel(e.target.value)}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-brand-green focus:outline-none focus:ring-1 focus:ring-brand-green dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
+            {CARE_LEVELS.map((cl) => (
+              <option key={cl.value} value={cl.value}>
+                {cl.label}
               </option>
             ))}
           </select>

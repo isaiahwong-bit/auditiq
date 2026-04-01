@@ -23,6 +23,7 @@ export async function createArea(params: {
   organisationId: string;
   name: string;
   areaType: string | null;
+  careLevel?: string;
   displayOrder: number;
 }) {
   const { data, error } = await supabaseAdmin
@@ -32,6 +33,7 @@ export async function createArea(params: {
       organisation_id: params.organisationId,
       name: params.name,
       area_type: params.areaType,
+      care_level: params.careLevel ?? 'medium',
       display_order: params.displayOrder,
     })
     .select()
@@ -46,12 +48,14 @@ export async function updateArea(
   params: {
     name?: string;
     areaType?: string | null;
+    careLevel?: string;
     displayOrder?: number;
   },
 ) {
   const updates: Record<string, unknown> = {};
   if (params.name !== undefined) updates.name = params.name;
   if (params.areaType !== undefined) updates.area_type = params.areaType;
+  if (params.careLevel !== undefined) updates.care_level = params.careLevel;
   if (params.displayOrder !== undefined) updates.display_order = params.displayOrder;
 
   const { data, error } = await supabaseAdmin
