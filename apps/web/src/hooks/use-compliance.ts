@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import type { Framework, SiteFramework, RectificationPlan } from '@auditarmour/types';
+import type { Framework, SiteFramework, RectificationPlan, ClauseEvidence } from '@auditarmour/types';
 import type { AreaGapSummary } from './use-compliance-types';
 
 function useComplianceBase() {
@@ -96,6 +96,85 @@ export function useCompletePlan() {
         method: 'POST',
       }).then((r) => r.data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gapAnalysis'] });
+    },
+  });
+}
+
+// ── Clause evidence hooks ──────────────────────────────────────────────────
+
+export function useClauseEvidence(clauseId: string | null) {
+  const base = useComplianceBase();
+  return useQuery({
+    queryKey: ['clauseEvidence', base, clauseId],
+    queryFn: () =>
+      apiFetch<{ data: ClauseEvidence[] }>(`${base}/evidence/${clauseId}`).then(
+        (r) => r.data,
+      ),
+    enabled: !!clauseId,
+    retry: false,
+  });
+}
+
+export function useUploadEvidence() {
+  const base = useComplianceBase();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: {
+      clause_id: string;
+      facility_area_id?: string | null;
+      file_url: string;
+      file_name: string;
+      description?: string | null;
+    }) =>
+      apiFetch<{ data: ClauseEvidence }>(`${base}/evidence`, {
+        method: 'POST',
+        body: JSON.stringify({
+          ...params,
+          evidence_type: 'file' as const,
+        }),
+      }).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clauseEvidence'] });
+      queryClient.invalidateQueries({ queryKey: ['gapAnalysis'] });
+    },
+  });
+}
+
+export function useAddReference() {
+  const base = useComplianceBase();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: {
+      clause_id: string;
+      facility_area_id?: string | null;
+      reference_text: string;
+      description?: string | null;
+    }) =>
+      apiFetch<{ data: ClauseEvidence }>(`${base}/evidence`, {
+        method: 'POST',
+        body: JSON.stringify({
+          ...params,
+          evidence_type: 'reference' as const,
+        }),
+      }).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clauseEvidence'] });
+      queryClient.invalidateQueries({ queryKey: ['gapAnalysis'] });
+    },
+  });
+}
+
+export function useDeleteEvidence() {
+  const base = useComplianceBase();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (evidenceId: string) =>
+      apiFetch<{ data: { deleted: boolean } }>(`${base}/evidence/${evidenceId}`, {
+        method: 'DELETE',
+      }).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clauseEvidence'] });
       queryClient.invalidateQueries({ queryKey: ['gapAnalysis'] });
     },
   });

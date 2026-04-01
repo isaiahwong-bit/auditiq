@@ -80,3 +80,60 @@ complianceRoutes.post('/plans/:planId/complete', async (req, res, next) => {
     next(err);
   }
 });
+
+// ── Clause evidence ────────────────────────────────────────────────────────
+
+// GET /evidence/:clauseId — list evidence for a clause
+complianceRoutes.get('/evidence/:clauseId', async (req, res, next) => {
+  try {
+    const evidence = await complianceService.listClauseEvidence(
+      req.site!.id,
+      req.params.clauseId,
+    );
+    res.json({ data: evidence });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /evidence — create evidence (file upload or reference)
+const evidenceSchema = z.object({
+  clause_id: z.string().uuid(),
+  facility_area_id: z.string().uuid().nullable().optional(),
+  evidence_type: z.enum(['file', 'reference']),
+  file_url: z.string().nullable().optional(),
+  file_name: z.string().nullable().optional(),
+  reference_text: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+});
+
+complianceRoutes.post('/evidence', async (req, res, next) => {
+  try {
+    const body = evidenceSchema.parse(req.body);
+    const evidence = await complianceService.createClauseEvidence({
+      siteId: req.site!.id,
+      organisationId: req.org!.id,
+      clauseId: body.clause_id,
+      facilityAreaId: body.facility_area_id ?? null,
+      evidenceType: body.evidence_type,
+      fileUrl: body.file_url ?? null,
+      fileName: body.file_name ?? null,
+      referenceText: body.reference_text ?? null,
+      description: body.description ?? null,
+      uploadedBy: req.user!.id,
+    });
+    res.json({ data: evidence });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /evidence/:evidenceId — delete evidence
+complianceRoutes.delete('/evidence/:evidenceId', async (req, res, next) => {
+  try {
+    await complianceService.deleteClauseEvidence(req.params.evidenceId);
+    res.json({ data: { deleted: true } });
+  } catch (err) {
+    next(err);
+  }
+});

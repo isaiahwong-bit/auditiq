@@ -42,3 +42,20 @@ export interface SiteFramework {
   enabled_at: string | null;
   enabled_by: string | null;
 }
+
+export type EvidenceType = 'file' | 'reference';
+
+export interface ClauseEvidence {
+  id: string;
+  site_id: string;
+  organisation_id: string;
+  clause_id: string;
+  facility_area_id: string | null;
+  evidence_type: EvidenceType;
+  file_url: string | null;
+  file_name: string | null;
+  reference_text: string | null;
+  description: string | null;
+  uploaded_by: string | null;
+  created_at: string;
+}

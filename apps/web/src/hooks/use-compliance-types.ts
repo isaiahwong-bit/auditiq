@@ -14,6 +14,8 @@ export interface ClauseStatus {
   plan_description: string | null;
   plan_id: string | null;
   plan_status: string | null;
+  has_evidence: boolean;
+  evidence_count: number;
 }
 
 export interface AreaGapSummary {

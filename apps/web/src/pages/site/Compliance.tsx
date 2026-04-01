@@ -5,8 +5,13 @@ import {
   useToggleFramework,
   useGapAnalysis,
   useCreatePlan,
+  useClauseEvidence,
+  useUploadEvidence,
+  useAddReference,
+  useDeleteEvidence,
 } from '../../hooks/use-compliance';
 import type { ClauseStatus } from '../../hooks/use-compliance-types';
+import { supabase } from '../../lib/supabase';
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * Compliance Page
@@ -476,7 +481,20 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
   const [planDesc, setPlanDesc] = useState('');
   const [planDate, setPlanDate] = useState('');
   const [showRequirement, setShowRequirement] = useState(false);
+  const [showEvidenceList, setShowEvidenceList] = useState(false);
+  const [showReferenceForm, setShowReferenceForm] = useState(false);
+  const [referenceText, setReferenceText] = useState('');
+  const [referenceDesc, setReferenceDesc] = useState('');
+  const [uploading, setUploading] = useState(false);
   const createPlan = useCreatePlan();
+  const uploadEvidence = useUploadEvidence();
+  const addReference = useAddReference();
+  const deleteEvidence = useDeleteEvidence();
+
+  // Only fetch evidence list when the section is expanded
+  const { data: evidenceList } = useClauseEvidence(
+    showEvidenceList ? clause.clause_id : null,
+  );
 
   const handleCreatePlan = async () => {
     if (!planDesc.trim()) return;
@@ -491,11 +509,71 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
     setPlanDate('');
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const path = `evidence/${clause.clause_id}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('evidence')
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('evidence').getPublicUrl(path);
+
+      await uploadEvidence.mutateAsync({
+        clause_id: clause.clause_id,
+        facility_area_id: areaId,
+        file_url: urlData.publicUrl,
+        file_name: file.name,
+      });
+      setShowEvidenceList(true);
+    } catch (err) {
+      console.error('Evidence upload failed:', err);
+    } finally {
+      setUploading(false);
+      // Reset input so the same file can be re-selected
+      e.target.value = '';
+    }
+  };
+
+  const handleAddReference = async () => {
+    if (!referenceText.trim()) return;
+    await addReference.mutateAsync({
+      clause_id: clause.clause_id,
+      facility_area_id: areaId,
+      reference_text: referenceText,
+      description: referenceDesc || null,
+    });
+    setShowReferenceForm(false);
+    setReferenceText('');
+    setReferenceDesc('');
+    setShowEvidenceList(true);
+  };
+
+  const handleDeleteEvidence = async (evidenceId: string) => {
+    await deleteEvidence.mutateAsync(evidenceId);
+  };
+
+  // Determine badge state
+  const isCoveredByCheckItem = clause.covered && !clause.has_evidence;
+  const isCoveredByEvidence = clause.has_evidence && !clause.covering_check_item_name;
+  const isGap = !clause.covered && !clause.has_plan;
+
   return (
     <li className="px-4 py-3">
       <div className="flex items-start gap-3">
         {/* Status badge */}
-        {clause.covered ? (
+        {clause.covered && clause.has_evidence && !clause.covering_check_item_name ? (
+          <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md bg-brand-green-light px-2 py-0.5 text-xs font-semibold text-brand-green dark:bg-brand-green/15">
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+            Evidence ({clause.evidence_count})
+          </span>
+        ) : clause.covered ? (
           <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md bg-brand-green-light px-2 py-0.5 text-xs font-semibold text-brand-green dark:bg-brand-green/15">
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -546,6 +624,70 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
             </p>
           )}
 
+          {/* Evidence attached: show toggle to expand evidence list */}
+          {clause.has_evidence && (
+            <button
+              onClick={() => setShowEvidenceList(!showEvidenceList)}
+              className="mt-1 flex items-center gap-1.5 text-xs font-medium text-brand-green transition-colors hover:text-brand-green/80 dark:hover:text-brand-green/70"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              {showEvidenceList ? 'Hide evidence' : `View evidence (${clause.evidence_count})`}
+            </button>
+          )}
+
+          {/* Evidence list */}
+          {showEvidenceList && evidenceList && evidenceList.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {evidenceList.map((ev) => (
+                <div
+                  key={ev.id}
+                  className="flex items-center justify-between rounded-md border border-brand-green/20 bg-brand-green-light/30 px-3 py-2 dark:border-brand-green/30 dark:bg-brand-green/10"
+                >
+                  <div className="min-w-0 flex-1">
+                    {ev.evidence_type === 'file' ? (
+                      <a
+                        href={ev.file_url ?? '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs font-medium text-brand-blue hover:underline dark:text-blue-400"
+                      >
+                        <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span className="truncate">{ev.file_name}</span>
+                      </a>
+                    ) : (
+                      <p className="flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
+                        <svg className="h-3.5 w-3.5 shrink-0 text-brand-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101" />
+                        </svg>
+                        <span className="truncate">{ev.reference_text}</span>
+                      </p>
+                    )}
+                    {ev.description && (
+                      <p className="mt-0.5 text-[10px] text-brand-gray dark:text-gray-400">
+                        {ev.description}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleDeleteEvidence(ev.id)}
+                    disabled={deleteEvidence.isPending}
+                    className="ml-2 shrink-0 rounded p-1 text-gray-400 transition-colors hover:bg-gray-200/50 hover:text-brand-red dark:hover:bg-gray-700 dark:hover:text-brand-red disabled:opacity-50"
+                    aria-label="Delete evidence"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* NCAR eligible: show plan details */}
           {clause.has_plan && clause.plan_description && (
             <div className="mt-2 rounded-lg border border-brand-amber/20 bg-brand-amber-light/50 px-3 py-2.5 dark:border-brand-amber/30 dark:bg-brand-amber/10">
@@ -575,20 +717,48 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
             </p>
           )}
 
-          {/* Gap actions: create rectification plan */}
+          {/* Gap actions: create rectification plan, upload evidence, link reference */}
           {!clause.covered && !clause.has_plan && (
             <div className="mt-2.5">
-              {!showPlanForm ? (
-                <button
-                  onClick={() => setShowPlanForm(true)}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-brand-red/30 bg-brand-red-light/50 px-3 py-1.5 text-xs font-semibold text-brand-red transition-colors hover:border-brand-red/50 hover:bg-brand-red-light dark:border-brand-red/40 dark:bg-brand-red/10 dark:hover:bg-brand-red/20"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  Create rectification plan
-                </button>
-              ) : (
+              {!showPlanForm && !showReferenceForm ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setShowPlanForm(true)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-brand-red/30 bg-brand-red-light/50 px-3 py-1.5 text-xs font-semibold text-brand-red transition-colors hover:border-brand-red/50 hover:bg-brand-red-light dark:border-brand-red/40 dark:bg-brand-red/10 dark:hover:bg-brand-red/20"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create rectification plan
+                  </button>
+                  <label
+                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-brand-blue/30 bg-brand-blue-light/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue/50 hover:bg-brand-blue-light dark:border-brand-blue/40 dark:bg-brand-blue/10 dark:hover:bg-brand-blue/20 ${
+                      uploading ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {uploading ? 'Uploading...' : 'Upload evidence'}
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                  <button
+                    onClick={() => setShowReferenceForm(true)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue/30 bg-brand-blue-light/50 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue/50 hover:bg-brand-blue-light dark:border-brand-blue/40 dark:bg-brand-blue/10 dark:hover:bg-brand-blue/20"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101" />
+                    </svg>
+                    Link reference
+                  </button>
+                </div>
+              ) : showPlanForm ? (
                 <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -636,6 +806,62 @@ function ClauseRow({ clause, areaId }: { clause: ClauseStatus; areaId: string })
                         setShowPlanForm(false);
                         setPlanDesc('');
                         setPlanDate('');
+                      }}
+                      className="rounded-md border border-gray-300 px-4 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Where is this document or record kept?
+                    </label>
+                    <input
+                      type="text"
+                      value={referenceText}
+                      onChange={(e) => setReferenceText(e.target.value)}
+                      placeholder="e.g. Training register in SharePoint > Food Safety > HR-TR-001"
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Description (optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={referenceDesc}
+                      onChange={(e) => setReferenceDesc(e.target.value)}
+                      placeholder="e.g. Covers annual food safety training for all staff"
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleAddReference}
+                      disabled={!referenceText.trim() || addReference.isPending}
+                      className="inline-flex items-center rounded-md bg-brand-blue px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {addReference.isPending ? (
+                        <>
+                          <svg className="mr-1.5 h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          Saving...
+                        </>
+                      ) : (
+                        'Save reference'
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowReferenceForm(false);
+                        setReferenceText('');
+                        setReferenceDesc('');
                       }}
                       className="rounded-md border border-gray-300 px-4 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-600"
                     >

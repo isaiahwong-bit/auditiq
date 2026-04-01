@@ -85,6 +85,9 @@ export interface ClauseStatus {
   plan_description: string | null;
   plan_id: string | null;
   plan_status: string | null;
+  // Evidence
+  has_evidence: boolean;
+  evidence_count: number;
 }
 
 export interface AreaGapSummary {
@@ -152,6 +155,17 @@ export async function analyseGaps(siteId: string, organisationId: string): Promi
     planMap.set(plan.clause_id, { id: plan.id, description: plan.description, status: plan.status });
   }
 
+  // 5b. Get clause evidence counts for this site
+  const { data: evidenceRows } = await supabaseAdmin
+    .from('clause_evidence')
+    .select('clause_id')
+    .eq('site_id', siteId);
+
+  const evidenceCountMap = new Map<string, number>();
+  for (const row of evidenceRows ?? []) {
+    evidenceCountMap.set(row.clause_id, (evidenceCountMap.get(row.clause_id) ?? 0) + 1);
+  }
+
   // 6. Build clause statuses per area
   const clausesList = allClauses ?? [];
   const areaResults: AreaGapSummary[] = (areas ?? []).map((area) => {
@@ -169,6 +183,9 @@ export async function analyseGaps(siteId: string, organisationId: string): Promi
       const isInThisArea = coverage?.areaId === area.id ||
         (plan && (plans ?? []).find((p) => p.clause_id === clause.id && p.facility_area_id === area.id));
 
+      const evidenceCount = evidenceCountMap.get(clause.id) ?? 0;
+      const hasEvidence = evidenceCount > 0;
+
       if (isInThisArea || !coverage) {
         areaClauses.push({
           clause_id: clause.id,
@@ -180,12 +197,14 @@ export async function analyseGaps(siteId: string, organisationId: string): Promi
           framework_code: fw.code,
           framework_name: fw.name,
           category_id: clause.category_id,
-          covered: !!coverage,
+          covered: !!coverage || hasEvidence,
           covering_check_item_name: coverage?.name ?? null,
           has_plan: !!plan,
           plan_description: plan?.description ?? null,
           plan_id: plan?.id ?? null,
           plan_status: plan?.status ?? null,
+          has_evidence: hasEvidence,
+          evidence_count: evidenceCount,
         });
       }
     }
@@ -209,8 +228,12 @@ export async function analyseGaps(siteId: string, organisationId: string): Promi
 
   // Overall summary
   const totalClauses = clausesList.length;
-  const totalCovered = clausesList.filter((c) => coverageMap.has(c.id)).length;
-  const totalWithPlan = clausesList.filter((c) => !coverageMap.has(c.id) && planMap.has(c.id)).length;
+  const totalCovered = clausesList.filter(
+    (c) => coverageMap.has(c.id) || (evidenceCountMap.get(c.id) ?? 0) > 0,
+  ).length;
+  const totalWithPlan = clausesList.filter(
+    (c) => !coverageMap.has(c.id) && (evidenceCountMap.get(c.id) ?? 0) === 0 && planMap.has(c.id),
+  ).length;
   const totalGaps = totalClauses - totalCovered - totalWithPlan;
 
   return {
@@ -263,4 +286,66 @@ export async function completeRectificationPlan(planId: string) {
     .single();
   if (error) throw error;
   return data;
+}
+
+// ── Clause evidence ────────────────────────────────────────────────────────
+
+export async function listClauseEvidence(siteId: string, clauseId: string) {
+  const { data, error } = await supabaseAdmin
+    .from('clause_evidence')
+    .select('*')
+    .eq('site_id', siteId)
+    .eq('clause_id', clauseId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function createClauseEvidence(params: {
+  siteId: string;
+  organisationId: string;
+  clauseId: string;
+  facilityAreaId: string | null;
+  evidenceType: 'file' | 'reference';
+  fileUrl: string | null;
+  fileName: string | null;
+  referenceText: string | null;
+  description: string | null;
+  uploadedBy: string;
+}) {
+  const { data, error } = await supabaseAdmin
+    .from('clause_evidence')
+    .insert({
+      site_id: params.siteId,
+      organisation_id: params.organisationId,
+      clause_id: params.clauseId,
+      facility_area_id: params.facilityAreaId,
+      evidence_type: params.evidenceType,
+      file_url: params.fileUrl,
+      file_name: params.fileName,
+      reference_text: params.referenceText,
+      description: params.description,
+      uploaded_by: params.uploadedBy,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteClauseEvidence(evidenceId: string) {
+  const { error } = await supabaseAdmin
+    .from('clause_evidence')
+    .delete()
+    .eq('id', evidenceId);
+  if (error) throw error;
+}
+
+export async function getClauseEvidenceCount(siteId: string) {
+  const { count, error } = await supabaseAdmin
+    .from('clause_evidence')
+    .select('*', { count: 'exact', head: true })
+    .eq('site_id', siteId);
+  if (error) throw error;
+  return count ?? 0;
 }
