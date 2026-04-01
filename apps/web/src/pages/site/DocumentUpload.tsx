@@ -519,7 +519,7 @@ export default function DocumentUpload() {
                     Review required before creating facility areas
                   </p>
                   <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
-                    Claude AI extracted {extracted.areas.length} area(s) with{' '}
+                    AuditArmour extracted {extracted.areas.length} area(s) with{' '}
                     {extracted.areas.reduce(
                       (sum, a) => sum + (a.check_items?.length ?? 0),
                       0,
