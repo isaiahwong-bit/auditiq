@@ -47,7 +47,7 @@ export async function classifyObservation(
     .join('\n');
 
   const response = await claude.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-3-5-sonnet-latest',
     max_tokens: 256,
     system: `You are a food safety audit classification engine. Given an observation, classify it into exactly one of the following categories. Respond with JSON only, no prose.
 
@@ -114,7 +114,7 @@ export async function generateNarrative(params: {
     .join('\n\n');
 
   const response = await claude.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-3-5-sonnet-latest',
     max_tokens: 1024,
     system: `You are a food safety audit narrative generator for Australian food manufacturers. Given an observation, its classification, and the relevant framework clauses, generate a professional finding with clause mapping.
 
