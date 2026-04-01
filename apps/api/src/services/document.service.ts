@@ -129,7 +129,14 @@ export async function processDocument(
   try {
     const systemPrompt = `You are a food safety document analysis engine for Australian food manufacturers. You extract facility areas and pre-operational check items from uploaded documents (pre-op checklists, HACCP plans, scope of works).
 
-For each area, identify all check items with their appropriate scoring type and frequency. Map each check item to one of these 40 finding category codes:
+CRITICAL RULES for extracting areas:
+- Areas are the MAJOR SECTIONS or ZONES of a facility (e.g. "Change Room", "Trim General", "Veg Line", "Leaf Line 2"). A typical site has 3-8 areas.
+- Do NOT create a separate area for each individual check item. Each area should contain MULTIPLE check items (typically 5-25 items per area).
+- Look for section headers, bold text, dividing lines, or grouped rows in tables to identify area boundaries.
+- If the document is a pre-op checklist table, the area name is usually a header row or section label, and the individual rows beneath it are the check items within that area.
+- Common area types: production zones, change rooms, processing lines (e.g. "Trim Line", "Cook Line"), storage areas, equipment sections.
+
+For each check item, map it to one of these 40 finding category codes:
 ${FINDING_CATEGORIES.join(', ')}
 
 Respond with JSON only, no prose.`;
@@ -191,7 +198,15 @@ Respond with JSON only, no prose.`;
       });
       userContent.push({
         type: 'text',
-        text: `Analyse this document image and extract all facility areas with their check items.\n\n${jsonInstructions}`,
+        text: `Analyse this document image carefully. This is a pre-operational check document from an Australian food processing facility.
+
+1. First identify the MAJOR SECTIONS/ZONES in the document (typically 3-8 areas, not one per row).
+2. Then list all individual check items that belong under each section.
+3. Each area should have multiple check items grouped beneath it.
+
+Remember: areas are zones like "Change Room", "Trim General", "Veg Line" — NOT individual items like "Walls & Floors" or "Hand wash sinks".
+
+${jsonInstructions}`,
       });
     } else if (input.content) {
       userContent.push({
