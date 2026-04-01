@@ -19,11 +19,13 @@ import CapaDetail from './pages/site/CapaDetail';
 import Intelligence from './pages/site/Intelligence';
 import Compliance from './pages/site/Compliance';
 import SiteSettings from './pages/site/SiteSettings';
+import FacilityConfig from './pages/site/FacilityConfig';
 import AuditDetail from './pages/site/AuditDetail';
 import PreOpStart from './pages/site/PreOpStart';
 import PreOpSession from './pages/site/PreOpSession';
 import PreOpSummary from './pages/site/PreOpSummary';
 import Reports from './pages/site/Reports';
+import DocumentUpload from './pages/site/DocumentUpload';
 import Admin from './pages/Admin';
 import './index.css';
 
@@ -59,6 +61,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route path="/:orgSlug/sites/:siteSlug/intelligence" element={<Intelligence />} />
                 <Route path="/:orgSlug/sites/:siteSlug/reports" element={<Reports />} />
                 <Route path="/:orgSlug/sites/:siteSlug/settings/compliance" element={<Compliance />} />
+                <Route path="/:orgSlug/sites/:siteSlug/settings/facilities" element={<FacilityConfig />} />
+                <Route path="/:orgSlug/sites/:siteSlug/settings/documents" element={<DocumentUpload />} />
                 <Route path="/:orgSlug/sites/:siteSlug/settings" element={<SiteSettings />} />
               </Route>
             </Route>
