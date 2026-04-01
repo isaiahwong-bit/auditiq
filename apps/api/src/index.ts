@@ -70,8 +70,8 @@ app.use('/api/v1/ai', aiRoutes);
 // Error handling
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`AuditArmour API running on port ${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`AuditArmour API running on 0.0.0.0:${PORT}`);
 });
 
 export default app;
