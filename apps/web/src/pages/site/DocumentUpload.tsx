@@ -128,13 +128,16 @@ export default function DocumentUpload() {
     setIsDragging(false);
   }, []);
 
-  const isImageOrPdf = (file: File) =>
-    file.type.startsWith('image/') || file.type === 'application/pdf';
+  const isImage = (file: File) => file.type.startsWith('image/');
 
   const handleFile = useCallback((file: File) => {
     setDocName(file.name);
-    if (isImageOrPdf(file)) {
+    if (isImage(file)) {
       setSelectedFile(file);
+      setDocContent('');
+    } else if (file.type === 'application/pdf') {
+      // PDFs — keep the file for reference but don't send as image
+      setSelectedFile(null);
       setDocContent('');
     } else {
       setSelectedFile(null);
@@ -365,7 +368,7 @@ export default function DocumentUpload() {
                       />
                     )}
                     {selectedFile?.type === 'application/pdf' && (
-                      <p className="mt-1 text-xs text-brand-blue">PDF will be analysed by AI vision</p>
+                      <p className="mt-1 text-xs text-brand-amber">PDFs: please paste the text content below, or upload as an image (photo/screenshot) instead</p>
                     )}
                   </div>
                 )}

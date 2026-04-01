@@ -165,13 +165,29 @@ Respond with JSON only, no prose.`;
     // Build message content — text or image (vision)
     const userContent: Array<
       | { type: 'text'; text: string }
-      | { type: 'image'; source: { type: 'url'; url: string } }
+      | { type: 'image'; source: { type: 'base64'; media_type: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp'; data: string } }
     > = [];
 
     if (input.imageUrl) {
+      // Fetch the image and convert to base64 for Claude Vision
+      const imageResponse = await fetch(input.imageUrl);
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const base64 = Buffer.from(imageBuffer).toString('base64');
+
+      // Determine media type from URL or content-type
+      const contentType = imageResponse.headers.get('content-type') ?? 'image/png';
+      let mediaType: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp' = 'image/png';
+      if (contentType.includes('jpeg') || contentType.includes('jpg')) mediaType = 'image/jpeg';
+      else if (contentType.includes('gif')) mediaType = 'image/gif';
+      else if (contentType.includes('webp')) mediaType = 'image/webp';
+      else if (contentType.includes('pdf')) {
+        // PDFs can't be sent as images — treat as text extraction request
+        throw new Error('PDF files cannot be processed via vision. Please paste the document text content instead, or upload as an image (PNG/JPG).');
+      }
+
       userContent.push({
         type: 'image',
-        source: { type: 'url', url: input.imageUrl },
+        source: { type: 'base64', media_type: mediaType, data: base64 },
       });
       userContent.push({
         type: 'text',
