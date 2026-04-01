@@ -228,17 +228,75 @@ ${jsonInstructions}`,
       throw new Error('Either content or imageUrl must be provided');
     }
 
-    // 2. Call Claude (vision-capable model handles both text and images)
-    const response = await claude.messages.create({
+    // 2. PASS 1 — Initial extraction
+    const pass1Response = await claude.messages.create({
       model: 'claude-opus-4-20250514',
       max_tokens: 8192,
       system: systemPrompt,
       messages: [{ role: 'user', content: userContent }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const parsed = JSON.parse(extractJson(text));
-    const validated = extractionResultSchema.parse(parsed);
+    const pass1Text = pass1Response.content[0].type === 'text' ? pass1Response.content[0].text : '';
+    const pass1Parsed = JSON.parse(extractJson(pass1Text));
+    const pass1Result = extractionResultSchema.parse(pass1Parsed);
+
+    // Count items from pass 1
+    const pass1ItemCount = pass1Result.areas.reduce((sum, a) => sum + a.check_items.length, 0);
+
+    // 3. PASS 2 — Verification pass: review the extraction against the image
+    const verifyContent: typeof userContent = [];
+
+    // Re-include the image if available
+    if (input.imageUrl) {
+      const imageResponse2 = await fetch(input.imageUrl);
+      const imageBuffer2 = await imageResponse2.arrayBuffer();
+      const base64_2 = Buffer.from(imageBuffer2).toString('base64');
+      const contentType2 = imageResponse2.headers.get('content-type') ?? 'image/png';
+      let mediaType2: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp' = 'image/png';
+      if (contentType2.includes('jpeg') || contentType2.includes('jpg')) mediaType2 = 'image/jpeg';
+      else if (contentType2.includes('gif')) mediaType2 = 'image/gif';
+      else if (contentType2.includes('webp')) mediaType2 = 'image/webp';
+
+      verifyContent.push({
+        type: 'image',
+        source: { type: 'base64', media_type: mediaType2, data: base64_2 },
+      });
+    }
+
+    verifyContent.push({
+      type: 'text',
+      text: `I previously extracted the following from this document. Please VERIFY my extraction is complete by carefully re-reading EVERY row in every table.
+
+My previous extraction found ${pass1Result.areas.length} areas with ${pass1ItemCount} total check items:
+${JSON.stringify(pass1Parsed, null, 2)}
+
+INSTRUCTIONS:
+1. Re-read the document carefully, counting every single row/item in each section.
+2. Compare against my extraction above.
+3. Add ANY items I missed. Look especially for:
+   - Items in small or rotated text
+   - Items near section boundaries
+   - Equipment-specific items (blades, conveyors, tanks, etc.)
+   - Environmental items (walls, floors, drains, condensation)
+4. Remove any items that are NOT actually in the document.
+5. Return the COMPLETE corrected extraction.
+
+${jsonInstructions}`,
+    });
+
+    const pass2Response = await claude.messages.create({
+      model: 'claude-opus-4-20250514',
+      max_tokens: 8192,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: verifyContent }],
+    });
+
+    const pass2Text = pass2Response.content[0].type === 'text' ? pass2Response.content[0].text : '';
+    const pass2Parsed = JSON.parse(extractJson(pass2Text));
+    const validated = extractionResultSchema.parse(pass2Parsed);
+
+    const pass2ItemCount = validated.areas.reduce((sum, a) => sum + a.check_items.length, 0);
+    console.log(`[Document] Pass 1: ${pass1ItemCount} items, Pass 2: ${pass2ItemCount} items (${pass2ItemCount - pass1ItemCount} added in verification)`);
 
     // 3. Store result and set status to 'review'
     const { error: saveError } = await supabaseAdmin
