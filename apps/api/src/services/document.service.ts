@@ -129,12 +129,22 @@ export async function processDocument(
   try {
     const systemPrompt = `You are a food safety document analysis engine for Australian food manufacturers. You extract facility areas and pre-operational check items from uploaded documents (pre-op checklists, HACCP plans, scope of works).
 
-CRITICAL RULES for extracting areas:
-- Areas are the MAJOR SECTIONS or ZONES of a facility (e.g. "Change Room", "Trim General", "Veg Line", "Leaf Line 2"). A typical site has 3-8 areas.
-- Do NOT create a separate area for each individual check item. Each area should contain MULTIPLE check items (typically 5-25 items per area).
-- Look for section headers, bold text, dividing lines, or grouped rows in tables to identify area boundaries.
-- If the document is a pre-op checklist table, the area name is usually a header row or section label, and the individual rows beneath it are the check items within that area.
-- Common area types: production zones, change rooms, processing lines (e.g. "Trim Line", "Cook Line"), storage areas, equipment sections.
+CRITICAL RULES:
+
+1. EXTRACTION ACCURACY:
+   - ONLY extract items that are ACTUALLY WRITTEN in the document. Do NOT invent, add, or suggest check items that are not explicitly listed.
+   - Read EVERY row in every table carefully. Do not skip any items, even if the text is small or rotated.
+   - Use the exact wording from the document for check item names where possible.
+
+2. AREA GROUPING:
+   - Areas are the MAJOR SECTIONS or ZONES (e.g. "Change Room", "Trim General", "Veg Line"). A typical site has 3-8 areas.
+   - Look for section headers, bold text, dividing lines, or labelled sections in tables.
+   - Do NOT create a separate area for each individual check item.
+   - Each area should contain MULTIPLE check items (typically 5-25 items per area).
+
+3. COVERAGE GAPS (separate section):
+   - Items that SHOULD exist based on food safety standards but are NOT in the document go in "coverage_gaps" ONLY.
+   - NEVER add suggested/missing items as check_items within areas. Those belong exclusively in coverage_gaps.
 
 For each check item, map it to one of these 40 finding category codes:
 ${FINDING_CATEGORIES.join(', ')}
@@ -198,13 +208,14 @@ Respond with JSON only, no prose.`;
       });
       userContent.push({
         type: 'text',
-        text: `Analyse this document image carefully. This is a pre-operational check document from an Australian food processing facility.
+        text: `Read this document image carefully. It is a pre-operational check document from an Australian food processing facility.
 
-1. First identify the MAJOR SECTIONS/ZONES in the document (typically 3-8 areas, not one per row).
-2. Then list all individual check items that belong under each section.
-3. Each area should have multiple check items grouped beneath it.
-
-Remember: areas are zones like "Change Room", "Trim General", "Veg Line" — NOT individual items like "Walls & Floors" or "Hand wash sinks".
+INSTRUCTIONS:
+1. Read EVERY SINGLE ROW in the table(s). The text may be rotated sideways — read it carefully. Do not skip any rows.
+2. Identify the SECTION HEADERS that divide the document into areas (e.g. "Trim / Cook Change Room", "Trim - General", "Trim - Veg Line 1", "Trim - Leaf Line 2"). These are your facility areas.
+3. List ALL check items under each section exactly as written in the document.
+4. Do NOT add any check items that are not explicitly written in the document. Suggested additions go ONLY in coverage_gaps.
+5. Include items like equipment names, blade checks, conveyor checks, chemical storage — everything listed in each row.
 
 ${jsonInstructions}`,
       });
@@ -219,8 +230,8 @@ ${jsonInstructions}`,
 
     // 2. Call Claude (vision-capable model handles both text and images)
     const response = await claude.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
+      model: 'claude-opus-4-20250514',
+      max_tokens: 8192,
       system: systemPrompt,
       messages: [{ role: 'user', content: userContent }],
     });
